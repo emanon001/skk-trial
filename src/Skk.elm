@@ -21,6 +21,7 @@ type alias HiraganaModeValue =
 
 type alias SkkInputKey =
     { key : String
+    , shift : Bool
     , ctrl : Bool
     }
 
