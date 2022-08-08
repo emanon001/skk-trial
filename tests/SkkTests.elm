@@ -46,6 +46,16 @@ suite =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.AsciiMode { kakutei = "" }) (Skk.update skk key)
+                , test "Ctrl-jを入力すると、ひらがなモードに切り替わること" <|
+                    \_ ->
+                        let
+                            skk =
+                                Skk.AsciiMode { kakutei = "abc" }
+
+                            key =
+                                { key = "j", shift = False, ctrl = True }
+                        in
+                        Expect.equal (Skk.HiraganaMode { kakutei = "abc", mikakutei = "" }) (Skk.update skk key)
                 ]
             ]
         ]
