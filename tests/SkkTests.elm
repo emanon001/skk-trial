@@ -57,5 +57,27 @@ suite =
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "abc", mikakutei = "" }) (Skk.update skk key)
                 ]
+            , describe "hiragana mode"
+                [ test "BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
+                    \_ ->
+                        let
+                            skk =
+                                Skk.HiraganaMode { kakutei = "あいう", mikakutei = "" }
+
+                            key =
+                                { key = "BackSpace", shift = False, ctrl = False }
+                        in
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あい", mikakutei = "" }) (Skk.update skk key)
+                , test "Spaceキーを入力すると、確定済み文字列の末尾にスペースが追加されること" <|
+                    \_ ->
+                        let
+                            skk =
+                                Skk.HiraganaMode { kakutei = "あいう", mikakutei = "" }
+
+                            key =
+                                { key = " ", shift = False, ctrl = False }
+                        in
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう ", mikakutei = "" }) (Skk.update skk key)
+                ]
             ]
         ]

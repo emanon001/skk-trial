@@ -70,9 +70,24 @@ updateAsciiMode value inputKey =
 
 
 updateHiraganaMode : HiraganaModeValue -> SkkInputKey -> Skk
-updateHiraganaMode value input =
-    -- TODO
-    HiraganaMode value
+updateHiraganaMode value inputKey =
+    if isSwitchToHenkanModeKey inputKey then
+        -- TODO
+        HiraganaMode value
+
+    else if isHenkanAcceptedKey inputKey then
+        -- TODO
+        HiraganaMode value
+
+    else if isBackSpaceKey inputKey then
+        HiraganaMode { value | kakutei = applyBackSpace value.kakutei }
+
+    else if isSpaceKey inputKey then
+        HiraganaMode { value | kakutei = value.kakutei ++ " " }
+
+    else
+        -- ignore
+        HiraganaMode value
 
 
 
@@ -82,6 +97,28 @@ updateHiraganaMode value input =
 isSwitchToKanaModeKey : SkkInputKey -> Bool
 isSwitchToKanaModeKey { key, ctrl } =
     key == "j" && ctrl
+
+
+isSwitchToHenkanModeKey : SkkInputKey -> Bool
+isSwitchToHenkanModeKey { key } =
+    let
+        pattern =
+            Regex.fromString "^[A-Z]$" |> Maybe.withDefault Regex.never
+    in
+    Regex.contains pattern key
+
+
+isHenkanAcceptedKey { key } =
+    let
+        pattern =
+            Regex.fromString "^[a-z0-9+=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
+    in
+    Regex.contains pattern key
+
+
+isSpaceKey : SkkInputKey -> Bool
+isSpaceKey { key } =
+    key == " "
 
 
 isBackSpaceKey : SkkInputKey -> Bool
