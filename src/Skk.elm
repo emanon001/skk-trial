@@ -52,13 +52,13 @@ update skk key =
 updateAsciiMode : AsciiModeValue -> SkkInputKey -> Skk
 updateAsciiMode value inputKey =
     let
-        additionalKey =
+        asciiKey =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
     if isSwitchToKanaModeKey inputKey then
         HiraganaMode { kakutei = value.kakutei, mikakutei = "" }
 
-    else if Regex.contains additionalKey inputKey.key then
+    else if Regex.contains asciiKey inputKey.key then
         AsciiMode { kakutei = value.kakutei ++ inputKey.key }
 
     else if isBackSpaceKey inputKey then
