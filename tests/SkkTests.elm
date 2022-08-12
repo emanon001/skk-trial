@@ -1,7 +1,6 @@
 module SkkTests exposing (..)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import Skk
 import Test exposing (..)
 

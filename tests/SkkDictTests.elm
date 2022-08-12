@@ -1,8 +1,7 @@
 module SkkDictTests exposing (..)
 
 import Dict
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import SkkDict
 import Test exposing (..)
 
