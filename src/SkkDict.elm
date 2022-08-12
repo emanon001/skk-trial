@@ -26,17 +26,17 @@ type alias SkkDictValues =
 fromDictString : String -> SkkDict
 fromDictString dictStr =
     let
-        toList : String -> List String
-        toList =
+        toLines : String -> List String
+        toLines =
             String.lines >> List.map String.trim
 
-        filterList : List String -> List String
-        filterList list =
-            List.filter (\row -> not (String.startsWith ";" row) && not (String.isEmpty row)) list
+        filterLines : List String -> List String
+        filterLines =
+            List.filter (\l -> not (String.startsWith ";" l) && not (String.isEmpty l))
 
         toEntry : String -> Maybe ( String, List String )
-        toEntry s =
-            case String.split "/" s of
+        toEntry l =
+            case String.split "/" l of
                 _ :: [] ->
                     Nothing
 
@@ -52,7 +52,7 @@ fromDictString dictStr =
                     Nothing
 
         buildDict : List String -> SkkDict
-        buildDict list =
-            List.filterMap toEntry list |> Dict.fromList
+        buildDict lines =
+            List.filterMap toEntry lines |> Dict.fromList
     in
-    toList dictStr |> filterList |> buildDict
+    toLines dictStr |> filterLines |> buildDict
