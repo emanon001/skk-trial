@@ -48,4 +48,38 @@ suite =
                     in
                     Expect.equal (Dict.fromList [ ( "a", [ "b", "c" ] ) ]) (SkkDict.fromDictString dictStr)
             ]
+        , describe "SkkDict.getHenkanList"
+            [ test "存在するキーを指定すると対応する変換一覧を取得できること" <|
+                \_ ->
+                    let
+                        dictStr =
+                            """
+                            ねこ /猫/
+                            だいすk /大好/
+                            きょう /今日/京/強/
+                            """
+
+                        dict =
+                            SkkDict.fromDictString dictStr
+                    in
+                    Expect.equal
+                        (Just [ "今日", "京", "強" ])
+                        (SkkDict.getCandidateList "きょう" dict)
+            , test "存在しないキーを指定するとNothingを返すこと" <|
+                \_ ->
+                    let
+                        dictStr =
+                            """
+                            ねこ /猫/
+                            だいすk /大好/
+                            きょう /今日/京/強/
+                            """
+
+                        dict =
+                            SkkDict.fromDictString dictStr
+                    in
+                    Expect.equal
+                        Nothing
+                        (SkkDict.getCandidateList "存在しないキー" dict)
+            ]
         ]

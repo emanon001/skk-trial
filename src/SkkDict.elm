@@ -1,4 +1,4 @@
-module SkkDict exposing (..)
+module SkkDict exposing (SkkDict, SkkDictCandidateList, SkkDictKey, fromDictString, getCandidateList)
 
 import Dict exposing (Dict)
 
@@ -8,14 +8,14 @@ import Dict exposing (Dict)
 
 
 type alias SkkDict =
-    Dict SkkDictKey SkkDictValues
+    Dict SkkDictKey SkkDictCandidateList
 
 
 type alias SkkDictKey =
     String
 
 
-type alias SkkDictValues =
+type alias SkkDictCandidateList =
     List String
 
 
@@ -56,3 +56,12 @@ fromDictString dictStr =
             List.filterMap toEntry lines |> Dict.fromList
     in
     toLines dictStr |> filterLines |> buildDict
+
+
+
+-- get
+
+
+getCandidateList : SkkDictKey -> SkkDict -> Maybe SkkDictCandidateList
+getCandidateList key dict =
+    Dict.get key dict
