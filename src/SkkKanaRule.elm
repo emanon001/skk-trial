@@ -16,7 +16,6 @@ type alias SkkKanaRules =
 type SkkKanaRuleTree
     = SkkKanaRuleLeafNode SkkKanaRule
     | SkkKanaRuleInternalNode (Dict Char SkkKanaRuleTree)
-    | SkkKanaRuleEmpty
 
 
 type alias SkkKanaRule =
@@ -386,31 +385,26 @@ type KanaRuleSearchResult
 search : String -> SkkKanaRules -> KanaRuleSearchResult
 search key rules =
     let
-        s : List Char -> SkkKanaRuleTree -> SkkKanaRuleTree
+        s : List Char -> SkkKanaRuleTree -> Maybe SkkKanaRuleTree
         s chars tree =
             case List.head chars of
                 Just ch ->
                     case tree of
                         SkkKanaRuleInternalNode children ->
-                            case Dict.get ch children of
-                                Just node ->
-                                    s (List.drop 1 chars) node
-
-                                Nothing ->
-                                    SkkKanaRuleEmpty
+                            Dict.get ch children |> Maybe.andThen (s (List.drop 1 chars))
 
                         _ ->
-                            SkkKanaRuleEmpty
+                            Nothing
 
                 Nothing ->
-                    tree
+                    Just tree
     in
     case s (String.toList key) rules.tree of
-        SkkKanaRuleLeafNode rule ->
+        Just (SkkKanaRuleLeafNode rule) ->
             PerfectMatch rule
 
-        SkkKanaRuleInternalNode _ ->
+        Just (SkkKanaRuleInternalNode _) ->
             PartialMatch
 
-        SkkKanaRuleEmpty ->
+        _ ->
             NoMatch
