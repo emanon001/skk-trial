@@ -57,5 +57,20 @@ suite =
                     Expect.equal
                         SkkKanaRule.NoMatch
                         (SkkKanaRule.search "kx" rules)
+            , test "半角スペースを含んだキーワードを指定した時に、該当する変換ルールを返すこと" <|
+                \_ ->
+                    let
+                        rules =
+                            SkkKanaRule.getDefaultRules
+                    in
+                    Expect.equal
+                        (SkkKanaRule.PerfectMatch
+                            { key = "z "
+                            , hiragana = "\u{3000}"
+                            , katakana = "\u{3000}"
+                            , next = Nothing
+                            }
+                        )
+                        (SkkKanaRule.search "z " rules)
             ]
         ]
