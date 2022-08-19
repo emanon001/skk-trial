@@ -347,11 +347,11 @@ getDefaultRules =
             let
                 leaf : Maybe SkkKanaRule
                 leaf =
-                    List.filter (\r -> nodeChar pos r.key == Nothing) rules |> List.head
+                    List.filter (\r -> edgeChar pos r.key == Nothing) rules |> List.head
 
                 nodeGroup : Dict Char (List SkkKanaRule)
                 nodeGroup =
-                    filterGroupBy (.key >> nodeChar pos) rules
+                    filterGroupBy (.key >> edgeChar pos) rules
             in
             case leaf of
                 Just l ->
@@ -365,8 +365,8 @@ getDefaultRules =
             { tree = List.filterMap toRule lines |> toTree 0
             }
 
-        nodeChar : Int -> String -> Maybe Char
-        nodeChar pos key =
+        edgeChar : Int -> String -> Maybe Char
+        edgeChar pos key =
             String.toList key |> List.drop pos |> List.head
     in
     toLines kanaRuleString |> filterLines |> buildRules
