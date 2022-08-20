@@ -1,24 +1,20 @@
-module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk(..), SkkHenkanMode(..), SkkInputKey, init, update)
+module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkHenkanMode(..), SkkInputKey, SkkInputMode(..), init, update)
 
 import Regex
 import SkkDict
+import SkkKanaRule
 
 
-type Skk
+type alias Skk =
+    { inputMode : SkkInputMode
+    , kanaRules : SkkKanaRule.SkkKanaRules
+    , dict : SkkDict.SkkDict
+    }
+
+
+type SkkInputMode
     = AsciiMode AsciiModeValue
     | HiraganaMode HiraganaModeValue
-
-
-type SkkHenkanMode
-    = KakuteiInputMode String
-    | MidashiInputMode
-        { midashi : String
-        , okuri : String
-        }
-    | DictHenkanMode
-        { candidateList : SkkDict.SkkDictCandidateList
-        , pos : Int
-        }
 
 
 type alias AsciiModeValue =
@@ -39,13 +35,28 @@ type alias SkkInputKey =
     }
 
 
+type SkkHenkanMode
+    = KakuteiInputMode String
+    | MidashiInputMode
+        { midashi : String
+        , okuri : String
+        }
+    | DictHenkanMode
+        { candidateList : SkkDict.SkkDictCandidateList
+        , pos : Int
+        }
+
+
 
 -- factory
 
 
-init : Skk
-init =
-    AsciiMode { input = "" }
+init : SkkKanaRule.SkkKanaRules -> SkkDict.SkkDict -> Skk
+init kanaRules dict =
+    { inputMode = AsciiMode { input = "" }
+    , kanaRules = kanaRules
+    , dict = dict
+    }
 
 
 
@@ -54,15 +65,15 @@ init =
 
 update : Skk -> SkkInputKey -> Skk
 update skk key =
-    case skk of
+    case skk.inputMode of
         AsciiMode value ->
-            updateAsciiMode value key
+            { skk | inputMode = updateAsciiMode value key }
 
         HiraganaMode value ->
-            updateHiraganaMode value key
+            { skk | inputMode = updateHiraganaMode value key }
 
 
-updateAsciiMode : AsciiModeValue -> SkkInputKey -> Skk
+updateAsciiMode : AsciiModeValue -> SkkInputKey -> SkkInputMode
 updateAsciiMode value inputKey =
     let
         asciiKey =
@@ -82,7 +93,7 @@ updateAsciiMode value inputKey =
         AsciiMode { input = value.input }
 
 
-updateHiraganaMode : HiraganaModeValue -> SkkInputKey -> Skk
+updateHiraganaMode : HiraganaModeValue -> SkkInputKey -> SkkInputMode
 updateHiraganaMode value inputKey =
     if isSwitchToHenkanModeKey inputKey then
         -- TODO
