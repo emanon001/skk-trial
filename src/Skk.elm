@@ -1,6 +1,7 @@
-module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk(..), SkkInputKey, init, update)
+module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk(..), SkkHenkanMode(..), SkkInputKey, init, update)
 
 import Regex
+import SkkDict
 
 
 type Skk
@@ -8,14 +9,26 @@ type Skk
     | HiraganaMode HiraganaModeValue
 
 
+type SkkHenkanMode
+    = KakuteiInputMode String
+    | MidashiInputMode
+        { midashi : String
+        , okuri : String
+        }
+    | DictHenkanMode
+        { candidateList : SkkDict.SkkDictCandidateList
+        , pos : Int
+        }
+
+
 type alias AsciiModeValue =
-    { kakutei : String
+    { input : String
     }
 
 
 type alias HiraganaModeValue =
-    { kakutei : String
-    , mikakutei : String
+    { input : String
+    , henkanMode : SkkHenkanMode
     }
 
 
@@ -32,7 +45,7 @@ type alias SkkInputKey =
 
 init : Skk
 init =
-    AsciiMode { kakutei = "" }
+    AsciiMode { input = "" }
 
 
 
@@ -56,17 +69,17 @@ updateAsciiMode value inputKey =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
     if isSwitchToKanaModeKey inputKey then
-        HiraganaMode { kakutei = value.kakutei, mikakutei = "" }
+        HiraganaMode { input = value.input, henkanMode = KakuteiInputMode "" }
 
     else if Regex.contains asciiKey inputKey.key then
-        AsciiMode { kakutei = value.kakutei ++ inputKey.key }
+        AsciiMode { input = value.input ++ inputKey.key }
 
     else if isBackSpaceKey inputKey then
-        AsciiMode { kakutei = applyBackSpace value.kakutei }
+        AsciiMode { input = applyBackSpace value.input }
 
     else
         -- ignore
-        AsciiMode { kakutei = value.kakutei }
+        AsciiMode { input = value.input }
 
 
 updateHiraganaMode : HiraganaModeValue -> SkkInputKey -> Skk
@@ -80,10 +93,10 @@ updateHiraganaMode value inputKey =
         HiraganaMode value
 
     else if isBackSpaceKey inputKey then
-        HiraganaMode { value | kakutei = applyBackSpace value.kakutei }
+        HiraganaMode { value | input = applyBackSpace value.input }
 
     else if isSpaceKey inputKey then
-        HiraganaMode { value | kakutei = value.kakutei ++ " " }
+        HiraganaMode { value | input = value.input ++ " " }
 
     else
         -- ignore
