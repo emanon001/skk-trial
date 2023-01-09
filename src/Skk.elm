@@ -1,4 +1,4 @@
-module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkHenkanMode(..), SkkInputKey, SkkInputMode(..), init, update)
+module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkContext, SkkHenkanMode(..), SkkInputKey, SkkInputMode(..), init, update)
 
 import Regex
 import SkkDict
@@ -7,7 +7,12 @@ import SkkKanaRule
 
 type alias Skk =
     { inputMode : SkkInputMode
-    , kanaRules : SkkKanaRule.SkkKanaRules
+    , context : SkkContext
+    }
+
+
+type alias SkkContext =
+    { kanaRules : SkkKanaRule.SkkKanaRules
     , dict : SkkDict.SkkDict
     }
 
@@ -51,11 +56,10 @@ type SkkHenkanMode
 -- factory
 
 
-init : SkkKanaRule.SkkKanaRules -> SkkDict.SkkDict -> Skk
-init kanaRules dict =
+init : SkkContext -> Skk
+init context =
     { inputMode = AsciiMode { input = "" }
-    , kanaRules = kanaRules
-    , dict = dict
+    , context = context
     }
 
 

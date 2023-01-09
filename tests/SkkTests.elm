@@ -3,7 +3,6 @@ module SkkTests exposing (..)
 import Dict
 import Expect
 import Skk
-import SkkDict
 import SkkKanaRule
 import Test exposing (..)
 
@@ -16,10 +15,12 @@ suite =
                 \_ ->
                     Expect.equal
                         { inputMode = Skk.AsciiMode { input = "" }
-                        , kanaRules = SkkKanaRule.getDefaultRules
-                        , dict = Dict.empty
+                        , context =
+                            { kanaRules = SkkKanaRule.getDefaultRules
+                            , dict = Dict.empty
+                            }
                         }
-                        (Skk.init SkkKanaRule.getDefaultRules Dict.empty)
+                        (Skk.init { kanaRules = SkkKanaRule.getDefaultRules, dict = Dict.empty })
             ]
         , describe "Skk.update"
             [ describe "ascii mode"
@@ -97,6 +98,8 @@ suite =
 initSkk : Skk.SkkInputMode -> Skk.Skk
 initSkk mode =
     { inputMode = mode
-    , kanaRules = SkkKanaRule.getDefaultRules
-    , dict = Dict.empty
+    , context =
+        { kanaRules = SkkKanaRule.getDefaultRules
+        , dict = Dict.empty
+        }
     }
