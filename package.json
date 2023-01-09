@@ -12,12 +12,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/emanon001/e1skk-trial.git"
+    "url": "git+https://github.com/emanon001/skk-trial.git"
   },
   "author": "emanon001",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/emanon001/e1skk-trial/issues"
+    "url": "https://github.com/emanon001/skk-trial/issues"
   },
-  "homepage": "https://github.com/emanon001/e1skk-trial#readme"
+  "homepage": "https://github.com/emanon001/skk-trial#readme"
 }
