@@ -41,11 +41,14 @@ type alias SkkInputKey =
 
 
 type SkkHenkanMode
-    = KakuteiInputMode String
+    = -- 確定入力モード。ローマ字から『ひらがな』または『カタカナ』に変換するモード
+      KakuteiInputMode String
+      -- 辞書変換の対象となる見出し語を入力するモード
     | MidashiInputMode
         { midashi : String
         , okuri : String
         }
+      -- 見出し語について辞書変換を行うモード
     | DictHenkanMode
         { candidateList : SkkDict.SkkDictCandidateList
         , pos : Int
@@ -101,11 +104,21 @@ updateHiraganaMode : HiraganaModeValue -> SkkInputKey -> SkkInputMode
 updateHiraganaMode value inputKey =
     if isSwitchToHenkanModeKey inputKey then
         -- TODO
+        -- (a) 確定入力モード → 見出し語入力モード
+        -- (b) 見出し語入力モードで送り仮名の位置を指定
         HiraganaMode value
 
     else if isHenkanAcceptedKey inputKey then
         -- TODO
-        HiraganaMode value
+        -- (a) 確定入力モード: ひらがな変換
+        -- (b) 見出し語入力モード: 送り仮名なし
+        -- (c) 見出し語入力モード: 送り仮名あり
+        case value.henkanMode of
+            KakuteiInputMode roma ->
+                HiraganaMode value
+
+            _ ->
+                HiraganaMode value
 
     else if isBackSpaceKey inputKey then
         HiraganaMode { value | input = applyBackSpace value.input }
