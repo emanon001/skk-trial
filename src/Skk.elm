@@ -19,17 +19,9 @@ type alias SkkContext =
 
 type SkkMode
     = AsciiInputMode AsciiInputModeValue
-    | HiraganaInputMode
-        -- ローマ字からひらがなに変換する確定入力モード
-        HiraganaInputModeValue
-    | HiraganaMidashiInputMode
-        -- 辞書変換の対象となるひらがなの見出し語を入力するモード
-        HiraganaMidashiInputModeValue
-    | HiraganaDictHenkanMode
-
-
-
--- ひらがなの見出し語について辞書変換を行うモード
+    | HiraganaInputMode HiraganaInputModeValue -- ローマ字からひらがなに変換する確定入力モード
+    | HiraganaMidashiInputMode HiraganaMidashiInputModeValue -- 辞書変換の対象となるひらがなの見出し語を入力するモード
+    | HiraganaDictHenkanMode -- ひらがなの見出し語について辞書変換を行うモード
 
 
 type alias AsciiInputModeValue =
