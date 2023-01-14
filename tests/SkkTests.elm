@@ -33,7 +33,7 @@ suite =
                             key =
                                 { key = "a", shift = False, ctrl = False }
                         in
-                        Expect.equal { skk | mode = Skk.AsciiInputMode { input = "a" } } (Skk.update skk key)
+                        Expect.equal (Skk.AsciiInputMode { input = "a" }) (Skk.update skk key).mode
                 , test "BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
                     \_ ->
                         let
@@ -43,7 +43,7 @@ suite =
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal { skk | mode = Skk.AsciiInputMode { input = "ab" } } (Skk.update skk key)
+                        Expect.equal (Skk.AsciiInputMode { input = "ab" }) (Skk.update skk key).mode
                 , test "確定済みの文字列が空の時にBSキーを入力すると、確定済み文字列が空のままになること" <|
                     \_ ->
                         let
@@ -53,7 +53,7 @@ suite =
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal { skk | mode = Skk.AsciiInputMode { input = "" } } (Skk.update skk key)
+                        Expect.equal (Skk.AsciiInputMode { input = "" }) (Skk.update skk key).mode
                 , test "Ctrl-jを入力すると、ひらがなモードに切り替わること" <|
                     \_ ->
                         let
@@ -63,7 +63,7 @@ suite =
                             key =
                                 { key = "j", shift = False, ctrl = True }
                         in
-                        Expect.equal { skk | mode = Skk.HiraganaInputMode { kakutei = "abc", mikakutei = "" } } (Skk.update skk key)
+                        Expect.equal (Skk.HiraganaInputMode { kakutei = "abc", mikakutei = "" }) (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード"
                 [ test "未確定の文字列が存在しない場合、BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
@@ -75,7 +75,7 @@ suite =
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal { skk | mode = Skk.HiraganaInputMode { kakutei = "あい", mikakutei = "" } } (Skk.update skk key)
+                        Expect.equal (Skk.HiraganaInputMode { kakutei = "あい", mikakutei = "" }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在する場合、BSキーを入力すると、未確定文字列の末尾文字が削除されること" <|
                     \_ ->
                         let
@@ -85,7 +85,7 @@ suite =
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal { skk | mode = Skk.HiraganaInputMode { kakutei = "あいう", mikakutei = "s" } } (Skk.update skk key)
+                        Expect.equal (Skk.HiraganaInputMode { kakutei = "あいう", mikakutei = "s" }) (Skk.update skk key).mode
                 , test "Spaceキーを入力すると、確定済み文字列の末尾にスペースが追加されること" <|
                     \_ ->
                         let
@@ -95,7 +95,7 @@ suite =
                             key =
                                 { key = " ", shift = False, ctrl = False }
                         in
-                        Expect.equal { skk | mode = Skk.HiraganaInputMode { kakutei = "あいう ", mikakutei = "" } } (Skk.update skk key)
+                        Expect.equal (Skk.HiraganaInputMode { kakutei = "あいう ", mikakutei = "" }) (Skk.update skk key).mode
                 ]
             ]
         ]
