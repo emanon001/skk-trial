@@ -35,8 +35,8 @@ type alias HiraganaInputModeValue =
 
 type SkkConvertMode
     = KakuteiInputMode KakuteiInputModeValue -- ■モード(確定入力モード)。ルールに従って、ローマ字から『ひらがな』『カタカタ』に変換するモード
-    | MidashiInputMode MidashiInputModeValue -- ▽モード。辞書変換の対象となる『ひらがな』『カタカナ』の見出し語を入力するモード
-    | DictConvertMode DictconvertModeValue -- ▼モード。見出し語について辞書変換を行うモード
+    | MidashiInputMode MidashiInputModeValue -- ▽モード(見出し語入力モード)。辞書変換の対象となる『ひらがな』『カタカナ』の見出し語を入力するモード
+    | DictConvertMode DictconvertModeValue -- ▼モード(辞書変換モード)。見出し語について辞書変換を行うモード
 
 
 type alias KakuteiInputModeValue =
@@ -45,8 +45,10 @@ type alias KakuteiInputModeValue =
 
 
 type alias MidashiInputModeValue =
-    { kakutei : String -- 確定した見出し語
-    , mikakutei : String -- 未確定の見出し語
+    { midashi :
+        { kakutei : String -- 確定した見出し語
+        , mikakutei : String -- 未確定の見出し語
+        }
     , okuri : String -- 送り仮名
     }
 
