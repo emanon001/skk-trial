@@ -162,6 +162,7 @@ isSwitchToHenkanModeKey { key } =
     Regex.contains pattern key
 
 
+isHenkanAcceptedKey : SkkInputKey -> Bool
 isHenkanAcceptedKey { key } =
     let
         pattern =
