@@ -1,4 +1,4 @@
-module Skk exposing (AsciiInputModeValue, HiraganaInputModeValue, Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), init, update)
+module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), init, update)
 
 import Regex
 import SkkDict
@@ -18,16 +18,16 @@ type alias SkkContext =
 
 
 type SkkInputMode
-    = AsciiInputMode AsciiInputModeValue -- Ascii文字を入力するモード
-    | HiraganaInputMode HiraganaInputModeValue -- ひらがなを入力するモード
+    = AsciiMode AsciiModeValue -- Ascii文字を入力するモード
+    | HiraganaMode HiraganaModeValue -- ひらがなを入力するモード
 
 
-type alias AsciiInputModeValue =
+type alias AsciiModeValue =
     { kakutei : String
     }
 
 
-type alias HiraganaInputModeValue =
+type alias HiraganaModeValue =
     { kakutei : String
     , convertMode : SkkConvertMode
     }
@@ -73,7 +73,7 @@ type alias SkkInputKey =
 
 init : SkkContext -> Skk
 init context =
-    { mode = AsciiInputMode { kakutei = "" }
+    { mode = AsciiMode { kakutei = "" }
     , context = context
     }
 
@@ -85,61 +85,96 @@ init context =
 update : Skk -> SkkInputKey -> Skk
 update skk key =
     case skk.mode of
-        AsciiInputMode value ->
-            { skk | mode = updateAsciiInputMode value skk.context key }
+        AsciiMode value ->
+            { skk | mode = updateAsciiMode value skk.context key }
 
-        HiraganaInputMode value ->
-            { skk | mode = updateHiraganaInputMode value skk.context key }
+        HiraganaMode value ->
+            { skk | mode = updateHiraganaMode value skk.context key }
 
 
-updateAsciiInputMode : AsciiInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
-updateAsciiInputMode value _ inputKey =
+updateAsciiMode : AsciiModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
+updateAsciiMode value _ inputKey =
     let
         asciiKey =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
     if isSwitchToKanaModeKey inputKey then
-        HiraganaInputMode { kakutei = value.kakutei, convertMode = KakuteiInputMode { mikakutei = "" } }
+        HiraganaMode { kakutei = value.kakutei, convertMode = KakuteiInputMode { mikakutei = "" } }
 
     else if Regex.contains asciiKey inputKey.key then
-        AsciiInputMode { kakutei = value.kakutei ++ inputKey.key }
+        AsciiMode { kakutei = value.kakutei ++ inputKey.key }
 
     else if isBackSpaceKey inputKey then
-        AsciiInputMode { kakutei = String.dropRight 1 value.kakutei }
+        AsciiMode { kakutei = String.dropRight 1 value.kakutei }
 
     else
         -- ignore
-        AsciiInputMode { kakutei = value.kakutei }
+        AsciiMode { kakutei = value.kakutei }
 
 
-updateHiraganaInputMode : HiraganaInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
-updateHiraganaInputMode value context inputKey =
+updateHiraganaMode : HiraganaModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
+updateHiraganaMode value context inputKey =
+    case value.convertMode of
+        KakuteiInputMode convertValue ->
+            updateKanaKakuteiInputMode True value.kakutei convertValue context inputKey
+
+        _ ->
+            HiraganaMode value
+
+
+updateKanaKakuteiInputMode : Bool -> String -> KakuteiInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
+updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
+    let
+        mkKanaMode : String -> SkkConvertMode -> SkkInputMode
+        mkKanaMode s convertMode =
+            if isHiragana then
+                HiraganaMode { kakutei = s, convertMode = convertMode }
+
+            else
+                -- TODO: カタカナモード
+                HiraganaMode { kakutei = s, convertMode = convertMode }
+
+        mkKakuteiMode : String -> SkkConvertMode
+        mkKakuteiMode s =
+            KakuteiInputMode { mikakutei = s }
+
+        default : SkkInputMode
+        default =
+            mkKanaMode kakutei (mkKakuteiMode convertValue.mikakutei)
+    in
     if isSwitchToconvertModeKey inputKey then
         -- TODO
         -- (a) 確定入力モード → 見出し語入力モード
-        -- (b) 見出し語入力モードで送り仮名の位置を指定
-        HiraganaInputMode value
+        default
 
     else if isConvertAcceptedKey inputKey then
-        convertForHiragana value context inputKey.key
+        let
+            searchKey =
+                convertValue.mikakutei ++ inputKey.key
+        in
+        case SkkKanaRule.search searchKey context.kanaRules of
+            SkkKanaRule.PartialMatch ->
+                mkKanaMode kakutei (mkKakuteiMode searchKey)
+
+            SkkKanaRule.PerfectMatch { hiragana, next } ->
+                mkKanaMode (kakutei ++ hiragana) (mkKakuteiMode (Maybe.withDefault "" next))
+
+            SkkKanaRule.NoMatch ->
+                mkKanaMode kakutei (mkKakuteiMode inputKey.key)
 
     else if isBackSpaceKey inputKey then
-        let
-            ( kakutei, convertMode ) =
-                applyBackSpaceForKana value.kakutei value.convertMode
-        in
-        HiraganaInputMode { value | kakutei = kakutei, convertMode = convertMode }
+        if String.isEmpty convertValue.mikakutei then
+            mkKanaMode (String.dropRight 1 kakutei) (mkKakuteiMode convertValue.mikakutei)
+
+        else
+            mkKanaMode kakutei (mkKakuteiMode (String.dropRight 1 convertValue.mikakutei))
 
     else if isSpaceKey inputKey then
-        let
-            ( kakutei, convertMode ) =
-                applySpaceForKana value.kakutei value.convertMode
-        in
-        HiraganaInputMode { value | kakutei = kakutei, convertMode = convertMode }
+        mkKanaMode (kakutei ++ " ") (mkKakuteiMode "")
 
     else
         -- ignore
-        HiraganaInputMode value
+        default
 
 
 
@@ -177,61 +212,3 @@ isSpaceKey { key } =
 isBackSpaceKey : SkkInputKey -> Bool
 isBackSpaceKey { key } =
     key == "BackSpace"
-
-
-
--- apply key functions
-
-
-applyBackSpaceForKana : String -> SkkConvertMode -> ( String, SkkConvertMode )
-applyBackSpaceForKana kakutei convertMode =
-    case convertMode of
-        KakuteiInputMode value ->
-            if String.isEmpty value.mikakutei then
-                ( String.dropRight 1 kakutei, convertMode )
-
-            else
-                ( kakutei, KakuteiInputMode { mikakutei = String.dropRight 1 value.mikakutei } )
-
-        _ ->
-            ( kakutei, convertMode )
-
-
-applySpaceForKana : String -> SkkConvertMode -> ( String, SkkConvertMode )
-applySpaceForKana kakutei convertMode =
-    case convertMode of
-        KakuteiInputMode value ->
-            ( kakutei ++ " ", KakuteiInputMode { mikakutei = String.dropRight 1 value.mikakutei } )
-
-        _ ->
-            ( kakutei, convertMode )
-
-
-convertForHiragana : HiraganaInputModeValue -> SkkContext -> String -> SkkInputMode
-convertForHiragana value context key =
-    let
-        { kakutei, convertMode } =
-            value
-    in
-    case convertMode of
-        -- (a) 確定入力モード: ひらがな変換
-        KakuteiInputMode { mikakutei } ->
-            let
-                searchKey =
-                    mikakutei ++ key
-            in
-            case SkkKanaRule.search searchKey context.kanaRules of
-                SkkKanaRule.PartialMatch ->
-                    HiraganaInputMode { value | convertMode = KakuteiInputMode { mikakutei = searchKey } }
-
-                SkkKanaRule.PerfectMatch { hiragana, next } ->
-                    HiraganaInputMode { kakutei = kakutei ++ hiragana, convertMode = KakuteiInputMode { mikakutei = Maybe.withDefault "" next } }
-
-                SkkKanaRule.NoMatch ->
-                    HiraganaInputMode { value | convertMode = KakuteiInputMode { mikakutei = key } }
-
-        _ ->
-            -- TODO
-            -- (b) 見出し語入力モード: 送り仮名なし
-            -- (c) 見出し語入力モード: 送り仮名あり
-            HiraganaInputMode value
