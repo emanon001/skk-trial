@@ -125,8 +125,9 @@ updateHiraganaMode value context inputKey =
 updateKanaKakuteiInputMode : Bool -> String -> KakuteiInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
 updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
     let
-        mkKanaMode : String -> SkkConvertMode -> SkkInputMode
-        mkKanaMode s convertMode =
+        -- ひらがな・カタカナモードのファクトリ
+        buildKanaMode : String -> SkkConvertMode -> SkkInputMode
+        buildKanaMode s convertMode =
             if isHiragana then
                 HiraganaMode { kakutei = s, convertMode = convertMode }
 
@@ -134,43 +135,71 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
                 -- TODO: カタカナモード
                 HiraganaMode { kakutei = s, convertMode = convertMode }
 
-        mkKakuteiMode : String -> SkkConvertMode
-        mkKakuteiMode s =
+        -- 確定入力モードのファクトリ
+        buildKakuteiMode : String -> SkkConvertMode
+        buildKakuteiMode s =
             KakuteiInputMode { mikakutei = s }
 
+        -- ローマ字からかなに変換
+        convertToKana : String -> String -> ( String, String )
+        convertToKana mikakutei key =
+            let
+                searchKey =
+                    mikakutei ++ key
+            in
+            case SkkKanaRule.search searchKey context.kanaRules of
+                SkkKanaRule.PartialMatch ->
+                    ( kakutei, searchKey )
+
+                SkkKanaRule.PerfectMatch { hiragana, next } ->
+                    -- TODO: カタカナモード
+                    ( kakutei ++ hiragana, Maybe.withDefault "" next )
+
+                SkkKanaRule.NoMatch ->
+                    if String.isEmpty mikakutei then
+                        ( kakutei, key )
+
+                    else
+                        -- 未確定文字列を初期化して再度変換を行う
+                        convertToKana "" key
+
+        -- デフォルト値
         default : SkkInputMode
         default =
-            mkKanaMode kakutei (mkKakuteiMode convertValue.mikakutei)
+            buildKanaMode kakutei (buildKakuteiMode convertValue.mikakutei)
     in
     if isSwitchToconvertModeKey inputKey then
-        -- TODO
-        -- (a) 確定入力モード → 見出し語入力モード
-        default
+        -- 確定入力モード → 見出し語入力モード
+        let
+            key =
+                String.toLower inputKey.key
+
+            ( midashiKakutei, midashiMikakutei ) =
+                convertToKana convertValue.mikakutei key
+        in
+        buildKanaMode kakutei
+            (MidashiInputMode
+                { midashi = { kakutei = midashiKakutei, mikakutei = midashiMikakutei }
+                , okuri = ""
+                }
+            )
 
     else if isConvertAcceptedKey inputKey then
         let
-            searchKey =
-                convertValue.mikakutei ++ inputKey.key
+            ( newKakutei, newMikakutei ) =
+                convertToKana convertValue.mikakutei inputKey.key
         in
-        case SkkKanaRule.search searchKey context.kanaRules of
-            SkkKanaRule.PartialMatch ->
-                mkKanaMode kakutei (mkKakuteiMode searchKey)
-
-            SkkKanaRule.PerfectMatch { hiragana, next } ->
-                mkKanaMode (kakutei ++ hiragana) (mkKakuteiMode (Maybe.withDefault "" next))
-
-            SkkKanaRule.NoMatch ->
-                mkKanaMode kakutei (mkKakuteiMode inputKey.key)
+        buildKanaMode newKakutei (buildKakuteiMode newMikakutei)
 
     else if isBackSpaceKey inputKey then
         if String.isEmpty convertValue.mikakutei then
-            mkKanaMode (String.dropRight 1 kakutei) (mkKakuteiMode convertValue.mikakutei)
+            buildKanaMode (String.dropRight 1 kakutei) (buildKakuteiMode convertValue.mikakutei)
 
         else
-            mkKanaMode kakutei (mkKakuteiMode (String.dropRight 1 convertValue.mikakutei))
+            buildKanaMode kakutei (buildKakuteiMode (String.dropRight 1 convertValue.mikakutei))
 
     else if isSpaceKey inputKey then
-        mkKanaMode (kakutei ++ " ") (mkKakuteiMode "")
+        buildKanaMode (kakutei ++ " ") (buildKakuteiMode "")
 
     else
         -- ignore
