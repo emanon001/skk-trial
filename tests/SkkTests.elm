@@ -126,7 +126,7 @@ suite =
                                 { key = "s", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "あいうっ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
-                , test "ローマ字からひらがなへの変換ルールが存在しない場合は、未確定の文字列に入力したキーが設定されること" <|
+                , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字の変換ルールが存在しない場合は、未確定の文字列に入力したキーが設定されること" <|
                     \_ ->
                         let
                             skk =
@@ -136,6 +136,36 @@ suite =
                                 { key = "b", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
+                , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字の変換ルールが存在する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
+                    \_ ->
+                        let
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "y" } })
+
+                            key =
+                                { key = "i", shift = False, ctrl = False }
+                        in
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうい", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                , test "アルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
+                    \_ ->
+                        let
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "" } })
+
+                            key =
+                                { key = "S", shift = True, ctrl = False }
+                        in
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { midashi = { kakutei = "", mikakutei = "s" }, okuri = "" } }) (Skk.update skk key).mode
+                , test "未確定の文字列が存在すると時にアルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
+                    \_ ->
+                        let
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+
+                            key =
+                                { key = "A", shift = True, ctrl = False }
+                        in
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { midashi = { kakutei = "しゃ", mikakutei = "" }, okuri = "" } }) (Skk.update skk key).mode
                 ]
             ]
         ]
