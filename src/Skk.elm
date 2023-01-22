@@ -98,7 +98,7 @@ updateAsciiMode value _ inputKey =
         asciiKey =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
-    if isSwitchToKanaModeKey inputKey then
+    if isSwitchToHiraganaModeKey inputKey then
         HiraganaMode { kakutei = value.kakutei, convertMode = KakuteiInputMode { mikakutei = "" } }
 
     else if Regex.contains asciiKey inputKey.key then
@@ -140,7 +140,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         buildKakuteiMode s =
             KakuteiInputMode { mikakutei = s }
 
-        -- ローマ字からかなに変換
+        -- ローマ字からひらがな・カタカナに変換
         convertToKana : String -> String -> ( String, String )
         convertToKana mikakutei key =
             let
@@ -168,7 +168,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         default =
             buildKanaMode kakutei (buildKakuteiMode convertValue.mikakutei)
     in
-    if isSwitchToconvertModeKey inputKey then
+    if isSwitchToMidashiInputModeKey inputKey then
         -- 確定入力モード → 見出し語入力モード
         let
             key =
@@ -210,13 +210,13 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
 -- key check functions
 
 
-isSwitchToKanaModeKey : SkkInputKey -> Bool
-isSwitchToKanaModeKey { key, ctrl } =
+isSwitchToHiraganaModeKey : SkkInputKey -> Bool
+isSwitchToHiraganaModeKey { key, ctrl } =
     key == "j" && ctrl
 
 
-isSwitchToconvertModeKey : SkkInputKey -> Bool
-isSwitchToconvertModeKey { key } =
+isSwitchToMidashiInputModeKey : SkkInputKey -> Bool
+isSwitchToMidashiInputModeKey { key } =
     let
         pattern =
             Regex.fromString "^[A-Z]$" |> Maybe.withDefault Regex.never
