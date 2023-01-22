@@ -1,5 +1,6 @@
 module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), init, update)
 
+import Html.Attributes exposing (default)
 import Regex
 import SkkDict
 import SkkKanaRule
@@ -20,6 +21,7 @@ type alias SkkContext =
 type SkkInputMode
     = AsciiMode AsciiModeValue -- Ascii文字を入力するモード
     | HiraganaMode HiraganaModeValue -- ひらがなを入力するモード
+    | KatakanaMode KatakanaModeValue -- カタカナを入力するモード
 
 
 type alias AsciiModeValue =
@@ -28,6 +30,12 @@ type alias AsciiModeValue =
 
 
 type alias HiraganaModeValue =
+    { kakutei : String
+    , convertMode : SkkConvertMode
+    }
+
+
+type alias KatakanaModeValue =
     { kakutei : String
     , convertMode : SkkConvertMode
     }
@@ -91,6 +99,13 @@ update skk key =
         HiraganaMode value ->
             { skk | mode = updateHiraganaMode value skk.context key }
 
+        KatakanaMode value ->
+            { skk | mode = updateKatakanaMode value skk.context key }
+
+
+
+-- update 入力モード
+
 
 updateAsciiMode : AsciiModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
 updateAsciiMode value _ inputKey =
@@ -120,6 +135,20 @@ updateHiraganaMode value context inputKey =
 
         _ ->
             HiraganaMode value
+
+
+updateKatakanaMode : KatakanaModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
+updateKatakanaMode value context inputKey =
+    case value.convertMode of
+        KakuteiInputMode convertValue ->
+            updateKanaKakuteiInputMode False value.kakutei convertValue context inputKey
+
+        _ ->
+            KatakanaMode value
+
+
+
+-- update 変換モード
 
 
 updateKanaKakuteiInputMode : Bool -> String -> KakuteiInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
@@ -184,6 +213,16 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
                 }
             )
 
+    else if isSwitchToKanaModeKey inputKey then
+        -- ひらがなモードとカタカナモードの切り替え
+        if isHiragana then
+            -- ひらがな → カタカナ
+            KatakanaMode { kakutei = kakutei, convertMode = buildKakuteiMode "" }
+
+        else
+            -- カタカナ → ひらがな
+            HiraganaMode { kakutei = kakutei, convertMode = buildKakuteiMode "" }
+
     else if isConvertAcceptedKey inputKey then
         let
             ( kakutei2, mikakutei ) =
@@ -222,6 +261,11 @@ isSwitchToMidashiInputModeKey { key } =
             Regex.fromString "^[A-Z]$" |> Maybe.withDefault Regex.never
     in
     Regex.contains pattern key
+
+
+isSwitchToKanaModeKey : SkkInputKey -> Bool
+isSwitchToKanaModeKey { key } =
+    key == "q"
 
 
 isConvertAcceptedKey : SkkInputKey -> Bool

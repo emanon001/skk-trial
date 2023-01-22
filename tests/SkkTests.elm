@@ -2,7 +2,7 @@ module SkkTests exposing (..)
 
 import Dict
 import Expect
-import Skk
+import Skk exposing (SkkConvertMode(..))
 import SkkKanaRule
 import Test exposing (..)
 
@@ -146,6 +146,16 @@ suite =
                                 { key = "i", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "あいうい", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                , test "qキーを入力するとカタカナモードに遷移すること" <|
+                    \_ ->
+                        let
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+
+                            key =
+                                { key = "q", shift = False, ctrl = False }
+                        in
+                        Expect.equal (Skk.KatakanaMode { kakutei = "あいう", convertMode = KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "アルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
