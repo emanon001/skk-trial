@@ -69,9 +69,9 @@ type alias DictconvertModeValue =
 
 
 type alias SkkInputKey =
-    { key : String
-    , shift : Bool
-    , ctrl : Bool
+    { key : String -- 入力したキーを表す文字列
+    , shift : Bool -- Shiftキーを入力しているか
+    , ctrl : Bool -- Ctrlキーを入力しているか
     }
 
 
