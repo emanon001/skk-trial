@@ -68,6 +68,9 @@ type alias DictConvertModeValue =
     }
 
 
+{-| KeyboardEventのwrapper
+<https://developer.mozilla.org/ja/docs/Web/API/KeyboardEvent>
+-}
 type alias SkkInputKey =
     { key : String -- 入力したキーを表す文字列
     , shift : Bool -- Shiftキーを入力しているか
@@ -161,8 +164,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
                 HiraganaMode { kakutei = s, convertMode = convertMode }
 
             else
-                -- TODO: カタカナモード
-                HiraganaMode { kakutei = s, convertMode = convertMode }
+                KatakanaMode { kakutei = s, convertMode = convertMode }
 
         -- 確定入力モードのファクトリ
         buildKakuteiMode : String -> SkkConvertMode
@@ -180,9 +182,12 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
                 SkkKanaRule.PartialMatch ->
                     ( "", searchKey )
 
-                SkkKanaRule.PerfectMatch { hiragana, next } ->
-                    -- TODO: カタカナモード
-                    ( hiragana, Maybe.withDefault "" next )
+                SkkKanaRule.PerfectMatch { hiragana, katakana, next } ->
+                    if isHiragana then
+                        ( hiragana, Maybe.withDefault "" next )
+
+                    else
+                        ( katakana, Maybe.withDefault "" next )
 
                 SkkKanaRule.NoMatch ->
                     if String.isEmpty mikakutei then
