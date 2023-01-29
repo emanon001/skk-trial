@@ -191,7 +191,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
 
                 SkkKanaRule.NoMatch ->
                     if String.isEmpty mikakutei then
-                        ( "", key )
+                        ( key, "" )
 
                     else
                         -- 未確定文字列を初期化して再度変換を行う
@@ -229,6 +229,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
             HiraganaMode { kakutei = kakutei, convertMode = buildKakuteiMode "" }
 
     else if isConvertAcceptedKey inputKey then
+        -- かな変換を試みる
         let
             ( kakutei2, mikakutei ) =
                 convertToKana convertValue.mikakutei inputKey.key
@@ -236,14 +237,12 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         buildKanaMode (kakutei ++ kakutei2) (buildKakuteiMode mikakutei)
 
     else if isBackSpaceKey inputKey then
+        -- 削除
         if String.isEmpty convertValue.mikakutei then
             buildKanaMode (String.dropRight 1 kakutei) (buildKakuteiMode convertValue.mikakutei)
 
         else
             buildKanaMode kakutei (buildKakuteiMode (String.dropRight 1 convertValue.mikakutei))
-
-    else if isSpaceKey inputKey then
-        buildKanaMode (kakutei ++ " ") (buildKakuteiMode "")
 
     else
         -- ignore
@@ -277,14 +276,9 @@ isConvertAcceptedKey : SkkInputKey -> Bool
 isConvertAcceptedKey { key } =
     let
         pattern =
-            Regex.fromString "^[a-z0-9+=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
+            Regex.fromString "^[a-z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
     Regex.contains pattern key
-
-
-isSpaceKey : SkkInputKey -> Bool
-isSpaceKey { key } =
-    key == " "
 
 
 isBackSpaceKey : SkkInputKey -> Bool

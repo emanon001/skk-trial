@@ -126,7 +126,7 @@ suite =
                                 { key = "s", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "あいうっ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
-                , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字の変換ルールが存在しない場合は、未確定の文字列に入力したキーが設定されること" <|
+                , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字が未確定の場合は、未確定の文字列に入力したキーが設定されること" <|
                     \_ ->
                         let
                             skk =
@@ -136,7 +136,7 @@ suite =
                                 { key = "b", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
-                , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字の変換ルールが存在する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
+                , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字が確定する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let
                             skk =
@@ -238,7 +238,7 @@ suite =
                                 { key = "s", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.KatakanaMode { kakutei = "アイウッ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
-                , test "ローマ字からカタカナへの変換ルールが存在しない かつ 入力した文字の変換ルールが存在しない場合は、未確定の文字列に入力したキーが設定されること" <|
+                , test "ローマ字からカタカナへの変換ルールが存在しない かつ 入力した文字が未確定の場合は、未確定の文字列に入力したキーが設定されること" <|
                     \_ ->
                         let
                             skk =
@@ -248,7 +248,7 @@ suite =
                                 { key = "b", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
-                , test "ローマ字からカタカナへの変換ルールが存在しない かつ 入力した文字の変換ルールが存在する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
+                , test "ローマ字からカタカナへの変換ルールが存在しない かつ 入力した文字が確定する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let
                             skk =
