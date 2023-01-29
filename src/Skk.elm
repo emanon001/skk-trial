@@ -127,7 +127,7 @@ updateAsciiMode value _ inputKey =
 
     else
         -- ignore
-        AsciiMode { kakutei = value.kakutei }
+        AsciiMode value
 
 
 updateHiraganaMode : HiraganaModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
