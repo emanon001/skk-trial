@@ -136,6 +136,9 @@ updateHiraganaMode value context inputKey =
         KakuteiInputMode convertValue ->
             updateKanaKakuteiInputMode True value.kakutei convertValue context inputKey
 
+        MidashiInputMode convertValue ->
+            updateMidashiInputMode True value.kakutei convertValue context inputKey
+
         _ ->
             HiraganaMode value
 
@@ -145,6 +148,9 @@ updateKatakanaMode value context inputKey =
     case value.convertMode of
         KakuteiInputMode convertValue ->
             updateKanaKakuteiInputMode False value.kakutei convertValue context inputKey
+
+        MidashiInputMode convertValue ->
+            updateMidashiInputMode True value.kakutei convertValue context inputKey
 
         _ ->
             KatakanaMode value
@@ -247,6 +253,12 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
     else
         -- ignore
         default
+
+
+updateMidashiInputMode : Bool -> String -> MidashiInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
+updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
+    -- TODO: 実装
+    HiraganaMode { kakutei = kakutei, convertMode = MidashiInputMode convertValue }
 
 
 
