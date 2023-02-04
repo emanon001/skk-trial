@@ -257,8 +257,32 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
 
 updateMidashiInputMode : Bool -> String -> MidashiInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
 updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
-    -- TODO: 実装
-    HiraganaMode { kakutei = kakutei, convertMode = MidashiInputMode convertValue }
+    let
+        -- ひらがな・カタカナモードのファクトリ
+        buildKanaMode : String -> SkkConvertMode -> SkkInputMode
+        buildKanaMode s convertMode =
+            if isHiragana then
+                HiraganaMode { kakutei = s, convertMode = convertMode }
+
+            else
+                KatakanaMode { kakutei = s, convertMode = convertMode }
+
+        -- デフォルト値
+        default : SkkInputMode
+        default =
+            buildKanaMode kakutei (MidashiInputMode convertValue)
+    in
+    if isConvertAcceptedKey inputKey then
+        -- TODO: かな変換を試みる
+        default
+
+    else if isBackSpaceKey inputKey then
+        -- TDOO: 削除
+        default
+
+    else
+        -- ignore
+        default
 
 
 
