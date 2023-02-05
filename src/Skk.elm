@@ -276,6 +276,10 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         -- TODO: かな変換を試みる
         default
 
+    else if isEnterKey inputKey then
+        -- TDOO: 確定
+        default
+
     else if isBackSpaceKey inputKey then
         -- TDOO: 削除
         default
@@ -287,6 +291,7 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
 
 
 -- key check functions
+-- ref. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
 
 
 isSwitchToHiraganaModeKey : SkkInputKey -> Bool
@@ -320,3 +325,8 @@ isConvertAcceptedKey { key } =
 isBackSpaceKey : SkkInputKey -> Bool
 isBackSpaceKey { key } =
     key == "BackSpace"
+
+
+isEnterKey : SkkInputKey -> Bool
+isEnterKey { key } =
+    key == "Enter"
