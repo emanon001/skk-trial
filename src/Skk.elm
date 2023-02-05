@@ -177,32 +177,6 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         buildKakuteiMode s =
             KakuteiInputMode { mikakutei = s }
 
-        -- ローマ字からひらがな・カタカナに変換
-        convertToKana : String -> String -> ( String, String )
-        convertToKana mikakutei key =
-            let
-                searchKey =
-                    mikakutei ++ key
-            in
-            case SkkKanaRule.search searchKey context.kanaRules of
-                SkkKanaRule.PartialMatch ->
-                    ( "", searchKey )
-
-                SkkKanaRule.PerfectMatch { hiragana, katakana, next } ->
-                    if isHiragana then
-                        ( hiragana, Maybe.withDefault "" next )
-
-                    else
-                        ( katakana, Maybe.withDefault "" next )
-
-                SkkKanaRule.NoMatch ->
-                    if String.isEmpty mikakutei then
-                        ( key, "" )
-
-                    else
-                        -- 未確定文字列を初期化して再度変換を行う
-                        convertToKana "" key
-
         -- デフォルト値
         default : SkkInputMode
         default =
@@ -215,7 +189,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
                 String.toLower inputKey.key
 
             ( midashiKakutei, midashiMikakutei ) =
-                convertToKana convertValue.mikakutei key
+                convertToKana isHiragana convertValue.mikakutei key context.kanaRules
         in
         buildKanaMode kakutei
             (MidashiInputMode
@@ -238,7 +212,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         -- かな変換を試みる
         let
             ( kakutei2, mikakutei ) =
-                convertToKana convertValue.mikakutei inputKey.key
+                convertToKana isHiragana convertValue.mikakutei inputKey.key context.kanaRules
         in
         buildKanaMode (kakutei ++ kakutei2) (buildKakuteiMode mikakutei)
 
@@ -287,6 +261,36 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
     else
         -- ignore
         default
+
+
+
+-- convert kana
+
+
+convertToKana : Bool -> String -> String -> SkkKanaRule.SkkKanaRules -> ( String, String )
+convertToKana isHiragana currentKey addtionalKey rules =
+    let
+        searchKey =
+            currentKey ++ addtionalKey
+    in
+    case SkkKanaRule.search searchKey rules of
+        SkkKanaRule.PartialMatch ->
+            ( "", searchKey )
+
+        SkkKanaRule.PerfectMatch { hiragana, katakana, next } ->
+            if isHiragana then
+                ( hiragana, Maybe.withDefault "" next )
+
+            else
+                ( katakana, Maybe.withDefault "" next )
+
+        SkkKanaRule.NoMatch ->
+            if String.isEmpty currentKey then
+                ( addtionalKey, "" )
+
+            else
+                -- 未確定文字列を初期化して再度変換を行う
+                convertToKana isHiragana "" addtionalKey rules
 
 
 
