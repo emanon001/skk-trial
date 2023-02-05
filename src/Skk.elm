@@ -57,7 +57,10 @@ type alias MidashiInputModeValue =
         { kakutei : String -- 確定した見出し語
         , mikakutei : String -- 未確定の見出し語
         }
-    , okuri : String -- 送り仮名
+    , okuri :
+        { kakutei : String -- 確定した送り仮名
+        , mikakutei : String -- 未確定の送り仮名
+        }
     }
 
 
@@ -194,7 +197,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         buildKanaMode kakutei
             (MidashiInputMode
                 { midashi = { kakutei = midashiKakutei, mikakutei = midashiMikakutei }
-                , okuri = ""
+                , okuri = { kakutei = "", mikakutei = "" }
                 }
             )
 
@@ -251,8 +254,14 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         let
             midashi =
                 convertValue.midashi
+
+            okuri =
+                convertValue.okuri
+
+            isConvertingMidashi =
+                String.isEmpty okuri.kakutei && String.isEmpty okuri.mikakutei
         in
-        if String.isEmpty convertValue.okuri then
+        if isConvertingMidashi then
             -- 見出しの変換
             let
                 ( midashiKakutei2, midashiMikakutei ) =

@@ -165,7 +165,7 @@ suite =
                             key =
                                 { key = "S", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { midashi = { kakutei = "", mikakutei = "s" }, okuri = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { midashi = { initMidashi | mikakutei = "s" }, okuri = initOkuri } }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在すると時にアルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
@@ -175,7 +175,7 @@ suite =
                             key =
                                 { key = "A", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { midashi = { kakutei = "しゃ", mikakutei = "" }, okuri = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { midashi = { initMidashi | kakutei = "しゃ" }, okuri = initOkuri } }) (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード(変換モード: 見出し語入力モード)"
                 [ test "ローマ字からひらがなへの変換ルールが部分的に存在する場合は、未確定の見出し語の末尾に入力したキーが追加されること" <|
@@ -185,7 +185,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "s" }
 
                             okuri =
-                                ""
+                                initOkuri
 
                             convertValue =
                                 { midashi = midashi
@@ -216,7 +216,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "sy" }
 
                             okuri =
-                                ""
+                                initOkuri
 
                             convertValue =
                                 { midashi = midashi
@@ -247,7 +247,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "s" }
 
                             okuri =
-                                ""
+                                initOkuri
 
                             convertValue =
                                 { midashi = midashi
@@ -278,7 +278,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "s" }
 
                             okuri =
-                                ""
+                                initOkuri
 
                             convertValue =
                                 { midashi = midashi
@@ -309,7 +309,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "y" }
 
                             okuri =
-                                ""
+                                initOkuri
 
                             convertValue =
                                 { midashi = midashi
@@ -434,7 +434,7 @@ suite =
                             key =
                                 { key = "S", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.MidashiInputMode { midashi = { kakutei = "", mikakutei = "s" }, okuri = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.MidashiInputMode { midashi = { initMidashi | mikakutei = "s" }, okuri = initOkuri } }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在すると時にアルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
@@ -444,7 +444,7 @@ suite =
                             key =
                                 { key = "A", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.MidashiInputMode { midashi = { kakutei = "シャ", mikakutei = "" }, okuri = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.MidashiInputMode { midashi = { initMidashi | kakutei = "シャ" }, okuri = initOkuri } }) (Skk.update skk key).mode
                 ]
             ]
         ]
@@ -461,4 +461,22 @@ initSkk mode =
         { kanaRules = SkkKanaRule.getDefaultRules
         , dict = Dict.empty
         }
+    }
+
+
+initMidashiModeValue =
+    { midashi = initMidashi
+    , okuri = initOkuri
+    }
+
+
+initMidashi =
+    { kakutei = ""
+    , mikakutei = ""
+    }
+
+
+initOkuri =
+    { kakutei = ""
+    , mikakutei = ""
     }
