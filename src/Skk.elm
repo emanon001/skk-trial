@@ -247,8 +247,29 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
             buildKanaMode kakutei (MidashiInputMode convertValue)
     in
     if isConvertAcceptedKey inputKey then
-        -- TODO: かな変換を試みる
-        default
+        -- かな変換を試みる
+        let
+            midashi =
+                convertValue.midashi
+        in
+        if String.isEmpty convertValue.okuri then
+            -- 見出しの変換
+            let
+                ( midashiKakutei2, midashiMikakutei ) =
+                    convertToKana isHiragana midashi.mikakutei inputKey.key context.kanaRules
+            in
+            buildKanaMode kakutei
+                (MidashiInputMode
+                    { convertValue
+                        | midashi = { kakutei = midashi.kakutei ++ midashiKakutei2, mikakutei = midashiMikakutei }
+                    }
+                )
+
+        else
+            -- 送りの変換
+            -- TODO: かな変換
+            -- TODO: 辞書変換モードに遷移
+            default
 
     else if isEnterKey inputKey then
         -- TDOO: 確定
