@@ -121,7 +121,7 @@ updateAsciiMode value _ inputKey =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
     if isSwitchToHiraganaModeKey inputKey then
-        HiraganaMode { kakutei = value.kakutei, convertMode = KakuteiInputMode { mikakutei = "" } }
+        HiraganaMode { kakutei = value.kakutei, convertMode = initKakuteiInputMode }
 
     else if Regex.contains asciiKey inputKey.key then
         AsciiMode { kakutei = value.kakutei ++ inputKey.key }
@@ -176,15 +176,10 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
             else
                 KatakanaMode { kakutei = s, convertMode = convertMode }
 
-        -- 確定入力モードのファクトリ
-        buildKakuteiMode : String -> SkkConvertMode
-        buildKakuteiMode s =
-            KakuteiInputMode { mikakutei = s }
-
         -- デフォルト値
         default : SkkInputMode
         default =
-            buildKanaMode kakutei (buildKakuteiMode convertValue.mikakutei)
+            buildKanaMode kakutei (buildKakuteiInputMode convertValue.mikakutei)
     in
     if isSwitchToMidashiInputModeKey inputKey then
         -- 確定入力モード → 見出し語入力モード
@@ -207,11 +202,11 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         -- ひらがなモードとカタカナモードの切り替え
         if isHiragana then
             -- ひらがな → カタカナ
-            KatakanaMode { kakutei = kakutei, convertMode = buildKakuteiMode "" }
+            KatakanaMode { kakutei = kakutei, convertMode = buildKakuteiInputMode "" }
 
         else
             -- カタカナ → ひらがな
-            HiraganaMode { kakutei = kakutei, convertMode = buildKakuteiMode "" }
+            HiraganaMode { kakutei = kakutei, convertMode = buildKakuteiInputMode "" }
 
     else if isConvertAcceptedKey inputKey then
         -- かな変換を試みる
@@ -219,7 +214,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
             ( kakutei2, mikakutei ) =
                 convertToKana isHiragana convertValue.mikakutei inputKey.key context.kanaRules
         in
-        buildKanaMode (kakutei ++ kakutei2) (buildKakuteiMode mikakutei)
+        buildKanaMode (kakutei ++ kakutei2) (buildKakuteiInputMode mikakutei)
 
     else if isBackSpaceKey inputKey then
         -- 削除
@@ -227,7 +222,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
             ( newKakutei, newMikakutei ) =
                 deleteInputChar kakutei convertValue.mikakutei
         in
-        buildKanaMode newKakutei (buildKakuteiMode newMikakutei)
+        buildKanaMode newKakutei (buildKakuteiInputMode newMikakutei)
 
     else
         -- ignore
@@ -259,7 +254,16 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         default =
             buildKanaMode kakutei (MidashiInputMode convertValue)
     in
-    if isConvertAcceptedKey inputKey then
+    if isCancelKey inputKey then
+        -- あいう▽ねこ + Ctrl-g → あいう
+        -- あいう▽はし*r + Ctrl-g → あいう▽はし
+        if isConvertingMidashi then
+            buildKanaMode kakutei initKakuteiInputMode
+
+        else
+            buildKanaMode kakutei (MidashiInputMode { convertValue | okuri = { kakutei = "", mikakutei = "" } })
+
+    else if isConvertAcceptedKey inputKey then
         -- かな変換を試みる
         -- ▽sy + a → ▽しゃ
         let
@@ -289,7 +293,7 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         -- 確定
         -- あいう▽ねこ + Enter → あいうねこ
         if isConvertingMidashi then
-            buildKanaMode (kakutei ++ convertValue.midashi.kakutei) (KakuteiInputMode { mikakutei = "" })
+            buildKanaMode (kakutei ++ convertValue.midashi.kakutei) initKakuteiInputMode
 
         else
             default
@@ -362,6 +366,20 @@ deleteInputChar kakutei mikakutei =
 
 
 
+-- factory(internal)
+
+
+initKakuteiInputMode : SkkConvertMode
+initKakuteiInputMode =
+    buildKakuteiInputMode ""
+
+
+buildKakuteiInputMode : String -> SkkConvertMode
+buildKakuteiInputMode mikakutei =
+    KakuteiInputMode { mikakutei = mikakutei }
+
+
+
 -- key check functions
 -- ref. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
 
@@ -402,3 +420,8 @@ isBackSpaceKey { key } =
 isEnterKey : SkkInputKey -> Bool
 isEnterKey { key } =
     key == "Enter"
+
+
+isCancelKey : SkkInputKey -> Bool
+isCancelKey { key, ctrl } =
+    key == "g" && ctrl

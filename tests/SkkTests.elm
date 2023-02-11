@@ -468,6 +468,60 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "見出し語を入力している最中にCtrl-gキーを入力すると、見出し入力モードがキャンセルされること" <|
+                    \_ ->
+                        let
+                            midashi =
+                                { kakutei = "ねこ", mikakutei = "" }
+
+                            okuri =
+                                { kakutei = "", mikakutei = "" }
+
+                            convertValue =
+                                { midashi = midashi
+                                , okuri = okuri
+                                }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "g", shift = False, ctrl = True }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , convertMode = Skk.KakuteiInputMode { mikakutei = "" }
+                                }
+                            )
+                            (Skk.update skk key).mode
+                , test "送り仮名を入力している最中にCtrl-gキーを入力すると、送り仮名の入力がキャンセルされること" <|
+                    \_ ->
+                        let
+                            midashi =
+                                { kakutei = "はし", mikakutei = "" }
+
+                            okuri =
+                                { kakutei = "t", mikakutei = "" }
+
+                            convertValue =
+                                { midashi = midashi
+                                , okuri = okuri
+                                }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "g", shift = False, ctrl = True }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , convertMode = Skk.MidashiInputMode { midashi = midashi, okuri = initOkuri }
+                                }
+                            )
+                            (Skk.update skk key).mode
                 ]
             , describe "カタカナ入力モード(変換モード: 確定入力モード)"
                 [ test "未確定の文字列が存在しない場合、BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
