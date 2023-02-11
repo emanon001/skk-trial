@@ -333,6 +333,33 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "見出し語を入力中にEnterキーを入力すると、確定済みの文字列の末尾に確定した見出し語が追加され、確定入力モードに遷移すること" <|
+                    \_ ->
+                        let
+                            midashi =
+                                { kakutei = "ねこ", mikakutei = "cy" }
+
+                            okuri =
+                                initOkuri
+
+                            convertValue =
+                                { midashi = midashi
+                                , okuri = okuri
+                                }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "Enter", shift = False, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいうねこ"
+                                , convertMode = Skk.KakuteiInputMode { mikakutei = "" }
+                                }
+                            )
+                            (Skk.update skk key).mode
                 ]
             , describe "カタカナ入力モード(変換モード: 確定入力モード)"
                 [ test "未確定の文字列が存在しない場合、BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|

@@ -283,8 +283,13 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
             default
 
     else if isEnterKey inputKey then
-        -- TDOO: 確定
-        default
+        -- 確定
+        -- ▽ねこ → ねこ
+        if isConvertingMidashi then
+            buildKanaMode (kakutei ++ convertValue.midashi.kakutei) (KakuteiInputMode { mikakutei = "" })
+
+        else
+            default
 
     else if isBackSpaceKey inputKey then
         -- TDOO: 削除
