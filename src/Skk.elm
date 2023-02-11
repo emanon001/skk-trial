@@ -187,6 +187,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
     in
     if isSwitchToMidashiInputModeKey inputKey then
         -- 確定入力モード → 見出し語入力モード
+        -- あいう + S → あいう▽s
         let
             key =
                 String.toLower inputKey.key
@@ -259,6 +260,7 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
     in
     if isConvertAcceptedKey inputKey then
         -- かな変換を試みる
+        -- ▽sy + a → ▽しゃ
         let
             midashi =
                 convertValue.midashi
@@ -284,7 +286,7 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
 
     else if isEnterKey inputKey then
         -- 確定
-        -- ▽ねこ → ねこ
+        -- あいう▽ねこ + Enter → あいうねこ
         if isConvertingMidashi then
             buildKanaMode (kakutei ++ convertValue.midashi.kakutei) (KakuteiInputMode { mikakutei = "" })
 
