@@ -4,6 +4,7 @@ import Html.Attributes exposing (default)
 import Regex
 import SkkDict
 import SkkKanaRule
+import String exposing (dropRight)
 
 
 type alias Skk =
@@ -222,11 +223,11 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
 
     else if isBackSpaceKey inputKey then
         -- 削除
-        if String.isEmpty convertValue.mikakutei then
-            buildKanaMode (String.dropRight 1 kakutei) (buildKakuteiMode convertValue.mikakutei)
-
-        else
-            buildKanaMode kakutei (buildKakuteiMode (String.dropRight 1 convertValue.mikakutei))
+        let
+            ( newKakutei, newMikakutei ) =
+                deleteInputChar kakutei convertValue.mikakutei
+        in
+        buildKanaMode newKakutei (buildKakuteiMode newMikakutei)
 
     else
         -- ignore
@@ -294,8 +295,23 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
             default
 
     else if isBackSpaceKey inputKey then
-        -- TDOO: 削除
-        default
+        -- 削除
+        -- ▽ねこ + BS → ▽ね
+        -- ▽はし*r + BS → ▽はし
+        -- ▽はし*っt + BS → ▽はし*っ
+        if isConvertingMidashi then
+            let
+                ( newKakutei, newMikakutei ) =
+                    deleteInputChar convertValue.midashi.kakutei convertValue.midashi.mikakutei
+            in
+            buildKanaMode kakutei (MidashiInputMode { convertValue | midashi = { kakutei = newKakutei, mikakutei = newMikakutei } })
+
+        else
+            let
+                ( newKakutei, newMikakutei ) =
+                    deleteInputChar convertValue.okuri.kakutei convertValue.okuri.mikakutei
+            in
+            buildKanaMode kakutei (MidashiInputMode { convertValue | okuri = { kakutei = newKakutei, mikakutei = newMikakutei } })
 
     else
         -- ignore
@@ -330,6 +346,19 @@ convertToKana isHiragana currentKey addtionalKey rules =
             else
                 -- 未確定文字列を初期化して再度変換を行う
                 convertToKana isHiragana "" addtionalKey rules
+
+
+
+-- delete char
+
+
+deleteInputChar : String -> String -> ( String, String )
+deleteInputChar kakutei mikakutei =
+    if String.isEmpty mikakutei then
+        ( dropRight 1 kakutei, mikakutei )
+
+    else
+        ( kakutei, dropRight 1 mikakutei )
 
 
 
