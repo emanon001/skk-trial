@@ -254,7 +254,11 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         default =
             buildKanaMode kakutei (MidashiInputMode convertValue)
     in
-    if isCancelKey inputKey then
+    if isSwitchToOkuriInputModeKey inputKey then
+        -- TODO: 送り仮名の入力に切り替え
+        default
+
+    else if isCancelKey inputKey then
         -- あいう▽ねこ + Ctrl-g → あいう
         -- あいう▽はし*r + Ctrl-g → あいう▽はし
         if isConvertingMidashi then
@@ -396,6 +400,11 @@ isSwitchToMidashiInputModeKey { key } =
             Regex.fromString "^[A-Z]$" |> Maybe.withDefault Regex.never
     in
     Regex.contains pattern key
+
+
+isSwitchToOkuriInputModeKey : SkkInputKey -> Bool
+isSwitchToOkuriInputModeKey =
+    isSwitchToMidashiInputModeKey
 
 
 isSwitchToKanaModeKey : SkkInputKey -> Bool
