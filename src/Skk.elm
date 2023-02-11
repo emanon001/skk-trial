@@ -244,6 +244,14 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
             else
                 KatakanaMode { kakutei = s, convertMode = convertMode }
 
+        isConvertingMidashi : Bool
+        isConvertingMidashi =
+            let
+                okuri =
+                    convertValue.okuri
+            in
+            String.isEmpty okuri.kakutei && String.isEmpty okuri.mikakutei
+
         -- デフォルト値
         default : SkkInputMode
         default =
@@ -254,12 +262,6 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         let
             midashi =
                 convertValue.midashi
-
-            okuri =
-                convertValue.okuri
-
-            isConvertingMidashi =
-                String.isEmpty okuri.kakutei && String.isEmpty okuri.mikakutei
         in
         if isConvertingMidashi then
             -- 見出しの変換
