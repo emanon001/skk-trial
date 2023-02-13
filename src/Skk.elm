@@ -1,7 +1,5 @@
 module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), init, update)
 
-import Html exposing (input)
-import Html.Attributes exposing (default)
 import Regex
 import SkkDict
 import SkkKanaRule
