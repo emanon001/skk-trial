@@ -1,5 +1,6 @@
 module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), init, update)
 
+import Html exposing (input)
 import Html.Attributes exposing (default)
 import Regex
 import SkkDict
@@ -279,6 +280,10 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         buildKanaMode kakutei
             (MidashiInputMode { kakutei = convertValue.kakutei ++ kakutei2, mikakutei = mikakutei })
 
+    else if isConvertKey inputKey then
+        -- TODO: 変換開始
+        default
+
     else if isEnterKey inputKey then
         -- 確定
         -- あいう▽ねこ + Enter → あいうねこ
@@ -323,6 +328,10 @@ updateMidashiOkuriInputMode isHiragana kakutei convertValue context inputKey =
     else if isConvertAcceptedKey inputKey then
         -- TODO: かな変換を試みる
         -- TODO: 辞書変換モードに遷移
+        default
+
+    else if isConvertKey inputKey then
+        -- TODO: 変換開始
         default
 
     else if isBackSpaceKey inputKey then
@@ -448,3 +457,8 @@ isEnterKey { key } =
 isCancelKey : SkkInputKey -> Bool
 isCancelKey { key, ctrl } =
     key == "g" && ctrl
+
+
+isConvertKey : SkkInputKey -> Bool
+isConvertKey { key } =
+    key == "Space"
