@@ -156,7 +156,7 @@ updateKatakanaMode value context inputKey =
             updateKanaKakuteiInputMode False value.kakutei convertValue context inputKey
 
         MidashiInputMode convertValue ->
-            updateMidashiInputMode True value.kakutei convertValue context inputKey
+            updateMidashiInputMode False value.kakutei convertValue context inputKey
 
         _ ->
             KatakanaMode value
