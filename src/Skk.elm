@@ -45,7 +45,7 @@ type alias KatakanaModeValue =
 type SkkConvertMode
     = KakuteiInputMode KakuteiInputModeValue -- ■モード(確定入力モード)。ルールに従って、ローマ字から『ひらがな』『カタカタ』に変換するモード
     | MidashiInputMode MidashiInputModeValue -- ▽モード(見出し語入力モード)。辞書変換の対象となる『ひらがな』『カタカナ』の見出し語を入力するモード
-    | OkuriInputMode OkuriInputModeValue -- ▽モード(見出し語入力モードのサブモード)。辞書変換の対象となる『ひらがな』『カタカナ』の送り仮名を入力するモード
+    | MidashiOkuriInputMode MidashiOkuriInputModeValue -- ▽モード(見出し語入力モード/送り仮名)。辞書変換の対象となる『ひらがな』『カタカナ』の送り仮名を入力するモード
     | DictConvertMode DictConvertModeValue -- ▼モード(辞書変換モード)。見出し語について辞書変換を行うモード
 
 
@@ -60,7 +60,7 @@ type alias MidashiInputModeValue =
     }
 
 
-type alias OkuriInputModeValue =
+type alias MidashiOkuriInputModeValue =
     { midashi : MidashiInputModeValue -- 見出し語
     , kakutei : String -- 確定した送り仮名
     , mikakutei : String -- 未確定の送り仮名
@@ -68,7 +68,7 @@ type alias OkuriInputModeValue =
 
 
 type alias DictConvertModeValue =
-    { prevMode : MidashiInputModeValue --
+    { prevMode : SkkConvertMode
     , candidateList : SkkDict.SkkDictCandidateList
     , pos : Int
     }
@@ -138,12 +138,19 @@ updateAsciiMode value _ inputKey =
 
 updateHiraganaMode : HiraganaModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
 updateHiraganaMode value context inputKey =
+    let
+        isHiragana =
+            True
+    in
     case value.convertMode of
         KakuteiInputMode convertValue ->
-            updateKanaKakuteiInputMode True value.kakutei convertValue context inputKey
+            updateKanaKakuteiInputMode isHiragana value.kakutei convertValue context inputKey
 
         MidashiInputMode convertValue ->
-            updateMidashiInputMode True value.kakutei convertValue context inputKey
+            updateMidashiInputMode isHiragana value.kakutei convertValue context inputKey
+
+        MidashiOkuriInputMode convertValue ->
+            updateMidashiOkuriInputMode isHiragana value.kakutei convertValue context inputKey
 
         _ ->
             HiraganaMode value
@@ -151,15 +158,22 @@ updateHiraganaMode value context inputKey =
 
 updateKatakanaMode : KatakanaModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
 updateKatakanaMode value context inputKey =
+    let
+        isHiragana =
+            False
+    in
     case value.convertMode of
         KakuteiInputMode convertValue ->
-            updateKanaKakuteiInputMode False value.kakutei convertValue context inputKey
+            updateKanaKakuteiInputMode isHiragana value.kakutei convertValue context inputKey
 
         MidashiInputMode convertValue ->
-            updateMidashiInputMode False value.kakutei convertValue context inputKey
+            updateMidashiInputMode isHiragana value.kakutei convertValue context inputKey
+
+        MidashiOkuriInputMode convertValue ->
+            updateMidashiOkuriInputMode isHiragana value.kakutei convertValue context inputKey
 
         _ ->
-            KatakanaMode value
+            HiraganaMode value
 
 
 
@@ -251,16 +265,13 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
         default
 
     else if isCancelKey inputKey then
+        -- キャンセル
         -- あいう▽ねこ + Ctrl-g → あいう
-        -- TODO: 送り仮名入力モードに移動 あいう▽はし*r + Ctrl-g → あいう▽はし
         buildKanaMode kakutei initKakuteiInputMode
 
     else if isConvertAcceptedKey inputKey then
         -- かな変換を試みる
         -- ▽sy + a → ▽しゃ
-        -- TODO: 送りの変換
-        -- TODO: かな変換
-        -- TODO: 辞書変換モードに遷移
         let
             ( kakutei2, mikakutei ) =
                 convertToKana isHiragana convertValue.mikakutei inputKey.key context.kanaRules
@@ -276,14 +287,53 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
     else if isBackSpaceKey inputKey then
         -- 削除
         -- ▽ねこ + BS → ▽ね
-        -- TODO: 送り仮名
+        let
+            ( newKakutei, newMikakutei ) =
+                deleteInputChar convertValue.kakutei convertValue.mikakutei
+        in
+        buildKanaMode kakutei (MidashiInputMode { kakutei = newKakutei, mikakutei = newMikakutei })
+
+    else
+        -- ignore
+        default
+
+
+updateMidashiOkuriInputMode : Bool -> String -> MidashiOkuriInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
+updateMidashiOkuriInputMode isHiragana kakutei convertValue context inputKey =
+    let
+        -- ひらがな・カタカナモードのファクトリ
+        buildKanaMode : String -> SkkConvertMode -> SkkInputMode
+        buildKanaMode s convertMode =
+            if isHiragana then
+                HiraganaMode { kakutei = s, convertMode = convertMode }
+
+            else
+                KatakanaMode { kakutei = s, convertMode = convertMode }
+
+        -- デフォルト値
+        default : SkkInputMode
+        default =
+            buildKanaMode kakutei (MidashiOkuriInputMode convertValue)
+    in
+    if isCancelKey inputKey then
+        -- キャンセル
+        -- あいう▽はし*r + Ctrl-g → あいう▽はし
+        buildKanaMode kakutei (MidashiInputMode convertValue.midashi)
+
+    else if isConvertAcceptedKey inputKey then
+        -- TODO: かな変換を試みる
+        -- TODO: 辞書変換モードに遷移
+        default
+
+    else if isBackSpaceKey inputKey then
+        -- 削除
         -- ▽はし*r + BS → ▽はし
         -- ▽はし*っt + BS → ▽はし*っ
         let
             ( newKakutei, newMikakutei ) =
                 deleteInputChar convertValue.kakutei convertValue.mikakutei
         in
-        buildKanaMode kakutei (MidashiInputMode { kakutei = newKakutei, mikakutei = newMikakutei })
+        buildKanaMode kakutei (MidashiOkuriInputMode { convertValue | kakutei = newKakutei, mikakutei = newMikakutei })
 
     else
         -- ignore
