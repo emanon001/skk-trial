@@ -45,6 +45,7 @@ type alias KatakanaModeValue =
 type SkkConvertMode
     = KakuteiInputMode KakuteiInputModeValue -- ■モード(確定入力モード)。ルールに従って、ローマ字から『ひらがな』『カタカタ』に変換するモード
     | MidashiInputMode MidashiInputModeValue -- ▽モード(見出し語入力モード)。辞書変換の対象となる『ひらがな』『カタカナ』の見出し語を入力するモード
+    | OkuriInputMode OkuriInputModeValue -- ▽モード(見出し語入力モードのサブモード)。辞書変換の対象となる『ひらがな』『カタカナ』の送り仮名を入力するモード
     | DictConvertMode DictConvertModeValue -- ▼モード(辞書変換モード)。見出し語について辞書変換を行うモード
 
 
@@ -54,14 +55,15 @@ type alias KakuteiInputModeValue =
 
 
 type alias MidashiInputModeValue =
-    { midashi :
-        { kakutei : String -- 確定した見出し語
-        , mikakutei : String -- 未確定の見出し語
-        }
-    , okuri :
-        { kakutei : String -- 確定した送り仮名
-        , mikakutei : String -- 未確定の送り仮名
-        }
+    { kakutei : String -- 確定した見出し語
+    , mikakutei : String -- 未確定の見出し語
+    }
+
+
+type alias OkuriInputModeValue =
+    { midashi : MidashiInputModeValue -- 見出し語
+    , kakutei : String -- 確定した送り仮名
+    , mikakutei : String -- 未確定の送り仮名
     }
 
 
@@ -193,9 +195,7 @@ updateKanaKakuteiInputMode isHiragana kakutei convertValue context inputKey =
         in
         buildKanaMode kakutei
             (MidashiInputMode
-                { midashi = { kakutei = midashiKakutei, mikakutei = midashiMikakutei }
-                , okuri = { kakutei = "", mikakutei = "" }
-                }
+                { kakutei = midashiKakutei, mikakutei = midashiMikakutei }
             )
 
     else if isSwitchToKanaModeKey inputKey then
@@ -241,14 +241,6 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
             else
                 KatakanaMode { kakutei = s, convertMode = convertMode }
 
-        isConvertingMidashi : Bool
-        isConvertingMidashi =
-            let
-                okuri =
-                    convertValue.okuri
-            in
-            String.isEmpty okuri.kakutei && String.isEmpty okuri.mikakutei
-
         -- デフォルト値
         default : SkkInputMode
         default =
@@ -260,66 +252,38 @@ updateMidashiInputMode isHiragana kakutei convertValue context inputKey =
 
     else if isCancelKey inputKey then
         -- あいう▽ねこ + Ctrl-g → あいう
-        -- あいう▽はし*r + Ctrl-g → あいう▽はし
-        if isConvertingMidashi then
-            buildKanaMode kakutei initKakuteiInputMode
-
-        else
-            buildKanaMode kakutei (MidashiInputMode { convertValue | okuri = { kakutei = "", mikakutei = "" } })
+        -- TODO: 送り仮名入力モードに移動 あいう▽はし*r + Ctrl-g → あいう▽はし
+        buildKanaMode kakutei initKakuteiInputMode
 
     else if isConvertAcceptedKey inputKey then
         -- かな変換を試みる
         -- ▽sy + a → ▽しゃ
+        -- TODO: 送りの変換
+        -- TODO: かな変換
+        -- TODO: 辞書変換モードに遷移
         let
-            midashi =
-                convertValue.midashi
+            ( kakutei2, mikakutei ) =
+                convertToKana isHiragana convertValue.mikakutei inputKey.key context.kanaRules
         in
-        if isConvertingMidashi then
-            -- 見出しの変換
-            let
-                ( midashiKakutei2, midashiMikakutei ) =
-                    convertToKana isHiragana midashi.mikakutei inputKey.key context.kanaRules
-            in
-            buildKanaMode kakutei
-                (MidashiInputMode
-                    { convertValue
-                        | midashi = { kakutei = midashi.kakutei ++ midashiKakutei2, mikakutei = midashiMikakutei }
-                    }
-                )
-
-        else
-            -- 送りの変換
-            -- TODO: かな変換
-            -- TODO: 辞書変換モードに遷移
-            default
+        buildKanaMode kakutei
+            (MidashiInputMode { kakutei = convertValue.kakutei ++ kakutei2, mikakutei = mikakutei })
 
     else if isEnterKey inputKey then
         -- 確定
         -- あいう▽ねこ + Enter → あいうねこ
-        if isConvertingMidashi then
-            buildKanaMode (kakutei ++ convertValue.midashi.kakutei) initKakuteiInputMode
-
-        else
-            default
+        buildKanaMode (kakutei ++ convertValue.kakutei) initKakuteiInputMode
 
     else if isBackSpaceKey inputKey then
         -- 削除
         -- ▽ねこ + BS → ▽ね
+        -- TODO: 送り仮名
         -- ▽はし*r + BS → ▽はし
         -- ▽はし*っt + BS → ▽はし*っ
-        if isConvertingMidashi then
-            let
-                ( newKakutei, newMikakutei ) =
-                    deleteInputChar convertValue.midashi.kakutei convertValue.midashi.mikakutei
-            in
-            buildKanaMode kakutei (MidashiInputMode { convertValue | midashi = { kakutei = newKakutei, mikakutei = newMikakutei } })
-
-        else
-            let
-                ( newKakutei, newMikakutei ) =
-                    deleteInputChar convertValue.okuri.kakutei convertValue.okuri.mikakutei
-            in
-            buildKanaMode kakutei (MidashiInputMode { convertValue | okuri = { kakutei = newKakutei, mikakutei = newMikakutei } })
+        let
+            ( newKakutei, newMikakutei ) =
+                deleteInputChar convertValue.kakutei convertValue.mikakutei
+        in
+        buildKanaMode kakutei (MidashiInputMode { kakutei = newKakutei, mikakutei = newMikakutei })
 
     else
         -- ignore
