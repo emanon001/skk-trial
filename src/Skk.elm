@@ -102,7 +102,7 @@ update : Skk -> SkkInputKey -> Skk
 update skk key =
     case skk.mode of
         AsciiMode value ->
-            { skk | mode = updateAsciiMode value skk.context key }
+            { skk | mode = updateAsciiMode { value = value, context = skk.context, inputKey = key } }
 
         HiraganaMode value ->
             { skk | mode = updateHiraganaMode value skk.context key }
@@ -115,8 +115,8 @@ update skk key =
 -- update 入力モード
 
 
-updateAsciiMode : AsciiModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
-updateAsciiMode value _ inputKey =
+updateAsciiMode : { value : AsciiModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateAsciiMode { value, inputKey } =
     let
         asciiRegex =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
