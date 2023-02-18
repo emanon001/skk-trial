@@ -105,7 +105,7 @@ update skk key =
             { skk | mode = updateAsciiMode { value = value, context = skk.context, inputKey = key } }
 
         HiraganaMode value ->
-            { skk | mode = updateHiraganaMode value skk.context key }
+            { skk | mode = updateHiraganaMode { value = value, context = skk.context, inputKey = key } }
 
         KatakanaMode value ->
             { skk | mode = updateKatakanaMode value skk.context key }
@@ -135,8 +135,8 @@ updateAsciiMode { value, inputKey } =
         AsciiMode value
 
 
-updateHiraganaMode : HiraganaModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
-updateHiraganaMode value context inputKey =
+updateHiraganaMode : { value : HiraganaModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateHiraganaMode { value, context, inputKey } =
     let
         isHiragana =
             True
