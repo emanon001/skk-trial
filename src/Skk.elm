@@ -161,7 +161,13 @@ updateHiraganaMode { value, context, inputKey } =
                 }
 
         MidashiOkuriInputMode convertValue ->
-            updateMidashiOkuriInputMode isHiragana value.kakutei convertValue context inputKey
+            updateMidashiOkuriInputMode
+                { isHiragana = isHiragana
+                , kakutei = value.kakutei
+                , convertValue = convertValue
+                , context = context
+                , inputKey = inputKey
+                }
 
         _ ->
             HiraganaMode value
@@ -193,7 +199,13 @@ updateKatakanaMode { value, context, inputKey } =
                 }
 
         MidashiOkuriInputMode convertValue ->
-            updateMidashiOkuriInputMode isHiragana value.kakutei convertValue context inputKey
+            updateMidashiOkuriInputMode
+                { isHiragana = isHiragana
+                , kakutei = value.kakutei
+                , convertValue = convertValue
+                , context = context
+                , inputKey = inputKey
+                }
 
         _ ->
             HiraganaMode value
@@ -325,8 +337,8 @@ updateMidashiInputMode { isHiragana, kakutei, convertValue, context, inputKey } 
         default
 
 
-updateMidashiOkuriInputMode : Bool -> String -> MidashiOkuriInputModeValue -> SkkContext -> SkkInputKey -> SkkInputMode
-updateMidashiOkuriInputMode isHiragana kakutei convertValue context inputKey =
+updateMidashiOkuriInputMode : { isHiragana : Bool, kakutei : String, convertValue : MidashiOkuriInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateMidashiOkuriInputMode { isHiragana, kakutei, convertValue, context, inputKey } =
     let
         -- ひらがな・カタカナモードのファクトリ
         buildKanaMode : String -> SkkConvertMode -> SkkInputMode
