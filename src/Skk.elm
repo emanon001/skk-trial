@@ -247,6 +247,10 @@ updateKanaKakuteiInputMode { isHiragana, kakutei, convertModeValue, context, inp
                 { kakutei = midashiKakutei, mikakutei = midashiMikakutei }
             )
 
+    else if isSwitchToAsciiModeKey inputKey then
+        -- TODO: Asciiモードに切り替え
+        default
+
     else if isSwitchToKanaModeKey inputKey then
         -- ひらがなモードとカタカナモードの切り替え
         if isHiragana then
@@ -448,6 +452,11 @@ buildKakuteiInputMode mikakutei =
 isSwitchToHiraganaModeKey : SkkInputKey -> Bool
 isSwitchToHiraganaModeKey { key, ctrl } =
     key == "j" && ctrl
+
+
+isSwitchToAsciiModeKey : SkkInputKey -> Bool
+isSwitchToAsciiModeKey { key } =
+    key == "l"
 
 
 isSwitchToMidashiInputModeKey : SkkInputKey -> Bool
