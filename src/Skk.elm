@@ -319,8 +319,23 @@ updateMidashiInputMode { isHiragana, kakutei, convertModeValue, context, inputKe
             (MidashiInputMode { kakutei = convertModeValue.kakutei ++ kakutei2, mikakutei = mikakutei })
 
     else if isConvertKey inputKey then
-        -- TODO: 変換開始
-        default
+        -- 変換開始
+        -- TODO: 変換候補がない場合に、辞書登録モードに移行
+        -- ▽ねこ + Space → ▼猫
+        let
+            prevMode =
+                MidashiInputMode { convertModeValue | mikakutei = "" }
+
+            canditateList =
+                SkkDict.getCandidateList convertModeValue.kakutei context.dict
+        in
+        case canditateList of
+            Just candidateList ->
+                buildKanaMode kakutei
+                    (DictConvertMode { prevMode = prevMode, candidateList = candidateList, pos = 0 })
+
+            Nothing ->
+                default
 
     else if isEnterKey inputKey then
         -- 確定

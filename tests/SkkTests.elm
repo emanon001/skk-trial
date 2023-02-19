@@ -3,6 +3,7 @@ module SkkTests exposing (..)
 import Dict
 import Expect
 import Skk exposing (SkkConvertMode(..))
+import SkkDict
 import SkkKanaRule
 import Test exposing (..)
 
@@ -359,6 +360,30 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "見出し語を入力している最中にSpaceキーを入力すると、辞書変換モードに遷移すること" <|
+                    \_ ->
+                        let
+                            convertValue =
+                                { kakutei = "きょう", mikakutei = "" }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "Space", shift = False, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , convertMode =
+                                    Skk.DictConvertMode
+                                        { prevMode = Skk.MidashiInputMode convertValue
+                                        , candidateList = [ "今日", "京", "強" ]
+                                        , pos = 0
+                                        }
+                                }
+                            )
+                            (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード(変換モード: 見出し語入力モード/送り仮名)"
                 [ test "確定済みの送り仮名が存在する かつ 未確定の送り仮名が存在しない場合、BSキーを入力すると確定済みの送り仮名が削除されること" <|
@@ -559,10 +584,18 @@ suite =
 
 initSkk : Skk.SkkInputMode -> Skk.Skk
 initSkk mode =
+    let
+        dictString =
+            """
+            ねこ /猫/
+            だいすk /大好/
+            きょう /今日/京/強/
+            """
+    in
     { mode = mode
     , context =
         { kanaRules = SkkKanaRule.getDefaultRules
-        , dict = Dict.empty
+        , dict = SkkDict.fromDictString dictString
         }
     }
 
