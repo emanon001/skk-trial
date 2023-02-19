@@ -261,7 +261,7 @@ updateKanaKakuteiInputMode { isHiragana, kakutei, convertModeValue, context, inp
             -- カタカナ → ひらがな
             HiraganaMode { kakutei = kakutei, convertMode = buildKakuteiInputMode "" }
 
-    else if isConvertAcceptedKey inputKey then
+    else if isKanaConvertAcceptedKey inputKey then
         -- かな変換を試みる
         let
             ( kakutei2, mikakutei ) =
@@ -308,7 +308,7 @@ updateMidashiInputMode { isHiragana, kakutei, convertModeValue, context, inputKe
         -- あいう▽ねこ + Ctrl-g → あいう
         buildKanaMode kakutei initKakuteiInputMode
 
-    else if isConvertAcceptedKey inputKey then
+    else if isKanaConvertAcceptedKey inputKey then
         -- かな変換を試みる
         -- ▽sy + a → ▽しゃ
         let
@@ -363,7 +363,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, convertModeValue, context, in
         -- あいう▽はし*r + Ctrl-g → あいう▽はし
         buildKanaMode kakutei (MidashiInputMode convertModeValue.midashi)
 
-    else if isConvertAcceptedKey inputKey then
+    else if isKanaConvertAcceptedKey inputKey then
         -- TODO: かな変換を試みる
         -- TODO: 辞書変換モードに遷移
         default
@@ -478,8 +478,8 @@ isSwitchToKanaModeKey { key } =
     key == "q"
 
 
-isConvertAcceptedKey : SkkInputKey -> Bool
-isConvertAcceptedKey { key } =
+isKanaConvertAcceptedKey : SkkInputKey -> Bool
+isKanaConvertAcceptedKey { key } =
     let
         pattern =
             Regex.fromString "^[a-z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
