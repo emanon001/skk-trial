@@ -169,8 +169,14 @@ updateHiraganaMode { inputModeValue, context, inputKey } =
                 , inputKey = inputKey
                 }
 
-        _ ->
-            HiraganaMode inputModeValue
+        DictConvertMode convertValue ->
+            updateDictConvertMode
+                { isHiragana = isHiragana
+                , kakutei = inputModeValue.kakutei
+                , convertModeValue = convertValue
+                , context = context
+                , inputKey = inputKey
+                }
 
 
 updateKatakanaMode : { inputModeValue : KatakanaModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
@@ -207,8 +213,14 @@ updateKatakanaMode { inputModeValue, context, inputKey } =
                 , inputKey = inputKey
                 }
 
-        _ ->
-            HiraganaMode inputModeValue
+        DictConvertMode convertValue ->
+            updateDictConvertMode
+                { isHiragana = isHiragana
+                , kakutei = inputModeValue.kakutei
+                , convertModeValue = convertValue
+                , context = context
+                , inputKey = inputKey
+                }
 
 
 
@@ -396,6 +408,36 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, convertModeValue, context, in
                 deleteInputChar convertModeValue.kakutei convertModeValue.mikakutei
         in
         buildKanaMode kakutei (MidashiOkuriInputMode { convertModeValue | kakutei = newKakutei, mikakutei = newMikakutei })
+
+    else
+        -- ignore
+        default
+
+
+updateDictConvertMode : { isHiragana : Bool, kakutei : String, convertModeValue : DictConvertModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey } =
+    let
+        -- ひらがな・カタカナモードのファクトリ
+        buildKanaMode : String -> SkkConvertMode -> SkkInputMode
+        buildKanaMode s convertMode =
+            if isHiragana then
+                HiraganaMode { kakutei = s, convertMode = convertMode }
+
+            else
+                KatakanaMode { kakutei = s, convertMode = convertMode }
+
+        -- デフォルト値
+        default : SkkInputMode
+        default =
+            buildKanaMode kakutei (DictConvertMode convertModeValue)
+    in
+    if isCancelKey inputKey then
+        -- TODO: キャンセル
+        default
+
+    else if isConvertKey inputKey then
+        -- TODO: 次候補
+        default
 
     else
         -- ignore
