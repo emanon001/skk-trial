@@ -435,7 +435,11 @@ updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey
         -- TODO: キャンセル
         default
 
-    else if isConvertKey inputKey then
+    else if isPreviousCandidateKey inputKey then
+        -- TODO: 前候補
+        default
+
+    else if isNextCandidateKey inputKey then
         -- TODO: 次候補
         default
 
@@ -562,3 +566,13 @@ isCancelKey { key, ctrl } =
 isConvertKey : SkkInputKey -> Bool
 isConvertKey { key } =
     key == "Space"
+
+
+isNextCandidateKey : SkkInputKey -> Bool
+isNextCandidateKey { key } =
+    key == "Space"
+
+
+isPreviousCandidateKey : SkkInputKey -> Bool
+isPreviousCandidateKey { key } =
+    key == "x"
