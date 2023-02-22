@@ -377,7 +377,7 @@ suite =
                                 { kakutei = "あいう"
                                 , convertMode =
                                     Skk.DictConvertMode
-                                        { prevMode = Skk.MidashiInputMode convertValue
+                                        { prevMode = Skk.PreDictConvertMidashiInputMode convertValue
                                         , candidateList = [ "今日", "京", "強" ]
                                         , pos = 0
                                         }

@@ -1,4 +1,4 @@
-module Skk exposing (AsciiModeValue, HiraganaModeValue, Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), init, update)
+module Skk exposing (Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), SkkPreDictConvertMode(..), init, update)
 
 import Regex
 import SkkDict
@@ -66,10 +66,15 @@ type alias MidashiOkuriInputModeValue =
     }
 
 
+type SkkPreDictConvertMode
+    = PreDictConvertMidashiInputMode MidashiInputModeValue
+    | PreDictConvertMidashiOkuriInputMode MidashiOkuriInputModeValue
+
+
 type alias DictConvertModeValue =
-    { prevMode : SkkConvertMode
-    , candidateList : SkkDict.SkkDictCandidateList
-    , pos : Int
+    { prevMode : SkkPreDictConvertMode -- 辞書変換直前のモード
+    , candidateList : SkkDict.SkkDictCandidateList -- 変換候補の一覧
+    , pos : Int -- 変換候補の位置
     }
 
 
@@ -336,7 +341,7 @@ updateMidashiInputMode { isHiragana, kakutei, convertModeValue, context, inputKe
         -- ▽ねこ + Space → ▼猫
         let
             prevMode =
-                MidashiInputMode { convertModeValue | mikakutei = "" }
+                PreDictConvertMidashiInputMode { convertModeValue | mikakutei = "" }
 
             canditateList =
                 SkkDict.getCandidateList convertModeValue.kakutei context.dict
