@@ -440,13 +440,38 @@ updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey
         -- TODO: キャンセル
         default
 
-    else if isPreviousCandidateKey inputKey then
-        -- TODO: 前候補
-        default
-
     else if isNextCandidateKey inputKey then
-        -- TODO: 次候補
-        default
+        -- 次候補
+        let
+            { candidateList, pos } =
+                convertModeValue
+        in
+        if pos + 1 == List.length candidateList then
+            -- TODO: 辞書登録モード
+            default
+
+        else
+            buildKanaMode kakutei (DictConvertMode { convertModeValue | pos = pos + 1 })
+
+    else if isPreviousCandidateKey inputKey then
+        -- 前候補
+        let
+            { pos, prevMode } =
+                convertModeValue
+        in
+        if pos == 0 then
+            -- 直前の変換モードに戻る
+            buildKanaMode kakutei
+                (case prevMode of
+                    PreDictConvertMidashiInputMode v ->
+                        MidashiInputMode v
+
+                    PreDictConvertMidashiOkuriInputMode v ->
+                        MidashiOkuriInputMode v
+                )
+
+        else
+            buildKanaMode kakutei (DictConvertMode { convertModeValue | pos = pos - 1 })
 
     else
         -- ignore
