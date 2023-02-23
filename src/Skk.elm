@@ -431,14 +431,30 @@ updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey
             else
                 KatakanaMode { kakutei = s, convertMode = convertMode }
 
+        -- 直前の変換モード
+        previousConvertMode : SkkInputMode
+        previousConvertMode =
+            let
+                { prevMode } =
+                    convertModeValue
+            in
+            buildKanaMode kakutei
+                (case prevMode of
+                    PreDictConvertMidashiInputMode v ->
+                        MidashiInputMode v
+
+                    PreDictConvertMidashiOkuriInputMode v ->
+                        MidashiOkuriInputMode v
+                )
+
         -- デフォルト値
         default : SkkInputMode
         default =
             buildKanaMode kakutei (DictConvertMode convertModeValue)
     in
     if isCancelKey inputKey then
-        -- TODO: キャンセル
-        default
+        -- キャンセル
+        previousConvertMode
 
     else if isNextCandidateKey inputKey then
         -- 次候補
@@ -456,19 +472,12 @@ updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey
     else if isPreviousCandidateKey inputKey then
         -- 前候補
         let
-            { pos, prevMode } =
+            { pos } =
                 convertModeValue
         in
         if pos == 0 then
             -- 直前の変換モードに戻る
-            buildKanaMode kakutei
-                (case prevMode of
-                    PreDictConvertMidashiInputMode v ->
-                        MidashiInputMode v
-
-                    PreDictConvertMidashiOkuriInputMode v ->
-                        MidashiOkuriInputMode v
-                )
+            previousConvertMode
 
         else
             buildKanaMode kakutei (DictConvertMode { convertModeValue | pos = pos - 1 })
