@@ -61,9 +61,10 @@ type alias MidashiInputModeValue =
 
 
 type alias MidashiOkuriInputModeValue =
-    { midashi : MidashiInputModeValue -- 見出し語
-    , kakutei : String -- 確定した送り仮名
-    , mikakutei : String -- 未確定の送り仮名
+    { midashi : MidashiInputModeValue -- 見出し語。"▽たたか*っt" の場合は "たたか"
+    , head : String -- 送り仮名の最初のローマ字。"▽たたか*っt" の場合は "っ" を構成する "t"
+    , kakutei : String -- 確定した送り仮名。"▽たたか*っt" の場合は "っ"
+    , mikakutei : String -- 未確定の送り仮名。"▽たたか*っt" の場合は "t"
     }
 
 
@@ -388,8 +389,15 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, convertModeValue, context, in
         let
             ( newKakutei, newMikakutei ) =
                 deleteInputChar convertModeValue.kakutei convertModeValue.mikakutei
+
+            newHead =
+                if newKakutei == "" && newMikakutei == "" then
+                    ""
+
+                else
+                    convertModeValue.head
         in
-        buildKanaMode isHiragana kakutei (MidashiOkuriInputMode { convertModeValue | kakutei = newKakutei, mikakutei = newMikakutei })
+        buildKanaMode isHiragana kakutei (MidashiOkuriInputMode { convertModeValue | head = newHead, kakutei = newKakutei, mikakutei = newMikakutei })
 
     else
         -- ignore

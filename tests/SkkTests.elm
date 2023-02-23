@@ -394,6 +394,7 @@ suite =
 
                             convertValue =
                                 { midashi = midashi
+                                , head = "t"
                                 , kakutei = "っ"
                                 , mikakutei = ""
                                 }
@@ -407,7 +408,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiOkuriInputMode { midashi = midashi, kakutei = "", mikakutei = "" }
+                                , convertMode = Skk.MidashiOkuriInputMode { midashi = midashi, head = "", kakutei = "", mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -419,6 +420,7 @@ suite =
 
                             convertValue =
                                 { midashi = midashi
+                                , head = "t"
                                 , kakutei = "っ"
                                 , mikakutei = "t"
                                 }
@@ -432,7 +434,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiOkuriInputMode { midashi = midashi, kakutei = "っ", mikakutei = "" }
+                                , convertMode = Skk.MidashiOkuriInputMode { midashi = midashi, head = "t", kakutei = "っ", mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -444,6 +446,7 @@ suite =
 
                             convertValue =
                                 { midashi = midashi
+                                , head = ""
                                 , kakutei = "t"
                                 , mikakutei = ""
                                 }
