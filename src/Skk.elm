@@ -1,5 +1,6 @@
 module Skk exposing (Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), SkkPreDictConvertMode(..), init, update)
 
+import Array
 import Regex
 import SkkDict
 import SkkKanaRule
@@ -481,6 +482,24 @@ updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey
 
         else
             buildKanaMode kakutei (DictConvertMode { convertModeValue | pos = pos - 1 })
+
+    else if isEnterKey inputKey then
+        -- TODO: 確定
+        -- あいう▼猫 → あいう猫
+        let
+            { pos, candidateList, prevMode } =
+                convertModeValue
+
+            converted =
+                Array.fromList candidateList |> Array.get pos |> Maybe.withDefault ""
+        in
+        case prevMode of
+            PreDictConvertMidashiInputMode _ ->
+                buildKanaMode (kakutei ++ converted) (KakuteiInputMode { mikakutei = "" })
+
+            PreDictConvertMidashiOkuriInputMode _ ->
+                -- TODO: 送り仮名に対応
+                default
 
     else
         -- ignore

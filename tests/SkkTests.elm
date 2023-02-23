@@ -609,6 +609,36 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "Enterキーを入力すると、選択中の変換候補を確定済みの文字列の末尾に追加すること" <|
+                    \_ ->
+                        let
+                            preConvertValue =
+                                { kakutei = "きょう", mikakutei = "" }
+
+                            convertValue =
+                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                , candidateList = [ "今日", "京", "強" ]
+                                , pos = 1
+                                }
+
+                            skk =
+                                initSkk
+                                    (Skk.HiraganaMode
+                                        { kakutei = "あいう"
+                                        , convertMode = Skk.DictConvertMode convertValue
+                                        }
+                                    )
+
+                            key =
+                                { key = "Enter", shift = False, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう京"
+                                , convertMode = Skk.KakuteiInputMode { mikakutei = "" }
+                                }
+                            )
+                            (Skk.update skk key).mode
                 ]
             , describe "カタカナ入力モード(変換モード: 確定入力モード)"
                 [ test "未確定の文字列が存在しない場合、BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
