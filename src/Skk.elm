@@ -122,6 +122,8 @@ update skk key =
 -- update 入力モード
 
 
+{-| Asciiモードを更新
+-}
 updateAsciiMode : { inputModeValue : AsciiModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateAsciiMode { inputModeValue, inputKey } =
     let
@@ -142,56 +144,22 @@ updateAsciiMode { inputModeValue, inputKey } =
         AsciiMode inputModeValue
 
 
+{-| ひらがなモードを更新
+-}
 updateHiraganaMode : { inputModeValue : HiraganaModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateHiraganaMode { inputModeValue, context, inputKey } =
-    let
-        isHiragana =
-            True
-    in
-    case inputModeValue.convertMode of
-        KakuteiInputMode convertValue ->
-            updateKanaKakuteiInputMode
-                { isHiragana = isHiragana
-                , kakutei = inputModeValue.kakutei
-                , convertModeValue = convertValue
-                , context = context
-                , inputKey = inputKey
-                }
-
-        MidashiInputMode convertValue ->
-            updateMidashiInputMode
-                { isHiragana = isHiragana
-                , kakutei = inputModeValue.kakutei
-                , convertModeValue = convertValue
-                , context = context
-                , inputKey = inputKey
-                }
-
-        MidashiOkuriInputMode convertValue ->
-            updateMidashiOkuriInputMode
-                { isHiragana = isHiragana
-                , kakutei = inputModeValue.kakutei
-                , convertModeValue = convertValue
-                , context = context
-                , inputKey = inputKey
-                }
-
-        DictConvertMode convertValue ->
-            updateDictConvertMode
-                { isHiragana = isHiragana
-                , kakutei = inputModeValue.kakutei
-                , convertModeValue = convertValue
-                , context = context
-                , inputKey = inputKey
-                }
+    updateKanaMode { isHiragana = True, inputModeValue = inputModeValue, context = context, inputKey = inputKey }
 
 
+{-| カタカナモードを更新
+-}
 updateKatakanaMode : { inputModeValue : KatakanaModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateKatakanaMode { inputModeValue, context, inputKey } =
-    let
-        isHiragana =
-            False
-    in
+    updateKanaMode { isHiragana = False, inputModeValue = inputModeValue, context = context, inputKey = inputKey }
+
+
+updateKanaMode : { isHiragana : Bool, inputModeValue : KatakanaModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateKanaMode { isHiragana, inputModeValue, context, inputKey } =
     case inputModeValue.convertMode of
         KakuteiInputMode convertValue ->
             updateKanaKakuteiInputMode
