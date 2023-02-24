@@ -369,10 +369,6 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, convertModeValue, context, in
         -- TODO: 辞書変換モードに遷移
         default
 
-    else if isConvertKey inputKey then
-        -- TODO: 変換開始
-        default
-
     else if isBackSpaceKey inputKey then
         -- 削除
         -- ▽はし*r + BS → ▽はし
