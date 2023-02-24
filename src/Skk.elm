@@ -447,7 +447,7 @@ updateDictConvertMode { isHiragana, kakutei, convertModeValue, context, inputKey
             buildKanaMode isHiragana kakutei (DictConvertMode { convertModeValue | pos = pos - 1 })
 
     else if isEnterKey inputKey then
-        -- TODO: 確定
+        -- 確定
         -- あいう▼猫 → あいう猫
         let
             { pos, candidateList, prevMode } =
