@@ -541,8 +541,16 @@ isSwitchToMidashiInputModeKey { key } =
 
 
 isSwitchToOkuriInputModeKey : SkkInputKey -> Bool
-isSwitchToOkuriInputModeKey =
-    isSwitchToMidashiInputModeKey
+isSwitchToOkuriInputModeKey { key } =
+    let
+        alphaPattern =
+            Regex.fromString "^[A-Z]$" |> Maybe.withDefault Regex.never
+
+        vowelPattern =
+            Regex.fromString "^[AIUEO]$" |> Maybe.withDefault Regex.never
+    in
+    -- 母音は除く
+    Regex.contains alphaPattern key && not (Regex.contains vowelPattern key)
 
 
 isSwitchToKanaModeKey : SkkInputKey -> Bool
