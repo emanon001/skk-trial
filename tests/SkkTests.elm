@@ -263,6 +263,65 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "確定済みの文字列のみ存在する場合は、Shift + アルファベット(母音を除く)を入力すると送り仮名を入力モードに遷移すること" <|
+                    \_ ->
+                        let
+                            convertValue =
+                                { kakutei = "はし", mikakutei = "" }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "R", shift = True, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , convertMode =
+                                    Skk.MidashiOkuriInputMode
+                                        { midashi = convertValue, head = "r", kakutei = "", mikakutei = "r" }
+                                }
+                            )
+                            (Skk.update skk key).mode
+                , test "確定済みの文字列が存在しない場合は、Shift + アルファベット(母音を除く)を入力しても無視されること" <|
+                    \_ ->
+                        let
+                            convertValue =
+                                { kakutei = "", mikakutei = "" }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "R", shift = True, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , convertMode = Skk.MidashiInputMode convertValue
+                                }
+                            )
+                            (Skk.update skk key).mode
+                , test "未確定の文字列が存在する場合は、Shift + アルファベット(母音を除く)を入力しても無視されること" <|
+                    \_ ->
+                        let
+                            convertValue =
+                                { kakutei = "は", mikakutei = "s" }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+
+                            key =
+                                { key = "R", shift = True, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , convertMode = Skk.MidashiInputMode convertValue
+                                }
+                            )
+                            (Skk.update skk key).mode
                 , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字が確定する場合は、確定済みの見出し語の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let

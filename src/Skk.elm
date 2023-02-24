@@ -270,8 +270,31 @@ updateMidashiInputMode { isHiragana, kakutei, convertModeValue, context, inputKe
             buildKanaMode isHiragana kakutei (MidashiInputMode convertModeValue)
     in
     if isSwitchToOkuriInputModeKey inputKey then
-        -- TODO: 送り仮名の入力に切り替え
-        default
+        -- 送り仮名の入力に切り替え
+        -- あいう▽はし + R → あいう▽はし*r
+        let
+            head =
+                String.toLower inputKey.key
+        in
+        case ( convertModeValue.kakutei, convertModeValue.mikakutei ) of
+            ( "", _ ) ->
+                -- 確定済みの文字列が存在しない
+                default
+
+            ( _, "" ) ->
+                -- 確定済みの文字列のみ存在する
+                buildKanaMode isHiragana
+                    kakutei
+                    (MidashiOkuriInputMode
+                        { midashi = convertModeValue
+                        , head = head
+                        , mikakutei = head
+                        , kakutei = ""
+                        }
+                    )
+
+            _ ->
+                default
 
     else if isCancelKey inputKey then
         -- キャンセル
