@@ -74,11 +74,11 @@ dya ぢゃ ヂャ
 dyi ぢぃ ヂィ
 dyu ぢゅ ヂュ
 dye ぢぇ ヂェ
-dyo ぢょ ヂョ ﾁﾞｮ
+dyo ぢょ ヂョ
 
-e え ｴ
+e え エ 
 
-ff っ ｯ f
+ff っ ッ f
 fa ふぁ ファ
 fi ふぃ フィ
 fu ふ フ
@@ -90,7 +90,7 @@ fyu ふゅ フュ
 fye ふぇ フェ
 fyo ふょ フョ
 
-gg っ ｯ g
+gg っ ッ g
 ga が ガ
 gi ぎ ギ
 gu ぐ グ
