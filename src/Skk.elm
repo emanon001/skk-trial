@@ -1,4 +1,4 @@
-module Skk exposing (Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), SkkPreDictConvertMode(..), init, update)
+module Skk exposing (Skk, SkkContext, SkkConvertMode(..), SkkInputKey, SkkInputMode(..), SkkPrevDictConvertMode(..), init, update)
 
 import Array
 import Regex
@@ -68,13 +68,13 @@ type alias MidashiOkuriInputModeValue =
     }
 
 
-type SkkPreDictConvertMode
+type SkkPrevDictConvertMode
     = PreDictConvertMidashiInputMode MidashiInputModeValue
     | PreDictConvertMidashiOkuriInputMode MidashiOkuriInputModeValue
 
 
 type alias DictConvertModeValue =
-    { prevMode : SkkPreDictConvertMode -- 辞書変換直前のモード
+    { prevMode : SkkPrevDictConvertMode -- 辞書変換直前のモード
     , candidateList : SkkDict.SkkDictCandidateList -- 変換候補の一覧
     , pos : Int -- 変換候補の位置
     }
