@@ -314,7 +314,6 @@ updateMidashiInputMode { isHiragana, kakutei, convertModeValue, context, inputKe
 
     else if isConvertKey inputKey then
         -- 変換開始
-        -- TODO: 変換候補がない場合に、辞書登録モードに移行
         -- ▽ねこ + Space → ▼猫
         let
             prevMode =
@@ -330,6 +329,7 @@ updateMidashiInputMode { isHiragana, kakutei, convertModeValue, context, inputKe
                     (DictConvertMode { prevMode = prevMode, candidateList = candidateList, pos = 0 })
 
             Nothing ->
+                -- TODO: 変換候補がない場合に、辞書登録モードに移行
                 default
 
     else if isEnterKey inputKey then
