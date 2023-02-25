@@ -227,8 +227,8 @@ updateKanaKakuteiInputMode { isHiragana, kakutei, convertModeValue, context, inp
             )
 
     else if isSwitchToAsciiModeKey inputKey then
-        -- TODO: Asciiモードに切り替え
-        default
+        -- Asciiモードに切り替え
+        AsciiMode { kakutei = kakutei }
 
     else if isSwitchToKanaModeKey inputKey then
         -- ひらがなモードとカタカナモードの切り替え

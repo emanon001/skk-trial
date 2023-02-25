@@ -147,6 +147,16 @@ suite =
                                 { key = "i", shift = False, ctrl = False }
                         in
                         Expect.equal (Skk.HiraganaMode { kakutei = "あいうい", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                , test "lキーを入力するとAsciiモードに遷移すること" <|
+                    \_ ->
+                        let
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+
+                            key =
+                                { key = "l", shift = False, ctrl = False }
+                        in
+                        Expect.equal (Skk.AsciiMode { kakutei = "あいう" }) (Skk.update skk key).mode
                 , test "qキーを入力するとカタカナモードに遷移すること" <|
                     \_ ->
                         let
