@@ -492,6 +492,8 @@ convertToKana isHiragana currentKey addtionalKey rules =
 
         SkkKanaRule.NoMatch ->
             if String.isEmpty currentKey then
+                -- ルールに存在しない検索キーは変換後の文字列として扱う
+                -- e.g. 数字、クォート
                 ( addtionalKey, "" )
 
             else
