@@ -2,7 +2,7 @@ module SkkTests exposing (..)
 
 import Dict
 import Expect
-import Skk exposing (SkkConvertMode(..))
+import Skk exposing (SkkConversionMode(..))
 import SkkDict
 import SkkKanaRule
 import Test exposing (..)
@@ -64,94 +64,94 @@ suite =
                             key =
                                 { key = "j", shift = False, ctrl = True }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "abc", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "abc", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード(変換モード: 確定入力モード)"
                 [ test "未確定の文字列が存在しない場合、BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あい", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あい", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在する場合、BSキーを入力すると、未確定文字列の末尾文字が削除されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
                 , test "Spaceキーを入力すると、確定済み文字列の末尾にスペースが追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = " ", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "ローマ字からひらがなへの変換ルールが部分的に存在する場合は、未確定の文字列の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = "y", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sy" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "sy" } }) (Skk.update skk key).mode
                 , test "ローマ字からひらがなへの変換ルールが存在する場合は、確定済みの文字列の末尾に変換結果が追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
 
                             key =
                                 { key = "a", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうしゃ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうしゃ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "ローマ字からひらがなへの変換ルールが存在する かつ 次の文字が存在する場合は、確定済みの文字列の末尾に変換結果が追加される かつ 未確定の文字列に次の文字が設定されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = "s", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうっ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうっ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
                 , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字が未確定の場合は、未確定の文字列に入力したキーが設定されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = "b", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
                 , test "ローマ字からひらがなへの変換ルールが存在しない かつ 入力した文字が確定する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "y" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "y" } })
 
                             key =
                                 { key = "i", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうい", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいうい", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "lキーを入力するとAsciiモードに遷移すること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
 
                             key =
                                 { key = "l", shift = False, ctrl = False }
@@ -161,32 +161,32 @@ suite =
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
 
                             key =
                                 { key = "q", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "あいう", convertMode = KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "あいう", conversionMode = KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "アルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } })
 
                             key =
                                 { key = "S", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { initMidashi | mikakutei = "s" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode { initMidashi | mikakutei = "s" } }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在すると時にアルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
 
                             key =
                                 { key = "A", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode { initMidashi | kakutei = "しゃ" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode { initMidashi | kakutei = "しゃ" } }) (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード(変換モード: 見出し語入力モード)"
                 [ test "ローマ字からひらがなへの変換ルールが部分的に存在する場合は、未確定の見出し語の末尾に入力したキーが追加されること" <|
@@ -196,7 +196,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "s" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "y", shift = False, ctrl = False }
@@ -204,7 +204,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
+                                , conversionMode =
                                     Skk.MidashiInputMode
                                         { kakutei = "かきく", mikakutei = "sy" }
                                 }
@@ -217,7 +217,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "sy" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "a", shift = False, ctrl = False }
@@ -225,7 +225,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
+                                , conversionMode =
                                     Skk.MidashiInputMode
                                         { kakutei = "かきくしゃ", mikakutei = "" }
                                 }
@@ -238,7 +238,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "s" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "s", shift = False, ctrl = False }
@@ -246,7 +246,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
+                                , conversionMode =
                                     Skk.MidashiInputMode
                                         { kakutei = "かきくっ", mikakutei = "s" }
                                 }
@@ -259,7 +259,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "s" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "b", shift = False, ctrl = False }
@@ -267,7 +267,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
+                                , conversionMode =
                                     Skk.MidashiInputMode
                                         { kakutei = "かきく", mikakutei = "b" }
                                 }
@@ -280,7 +280,7 @@ suite =
                                 { kakutei = "はし", mikakutei = "" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "R", shift = True, ctrl = False }
@@ -288,7 +288,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
+                                , conversionMode =
                                     Skk.MidashiOkuriInputMode
                                         { midashi = convertValue, head = "r", kakutei = "", mikakutei = "r" }
                                 }
@@ -301,7 +301,7 @@ suite =
                                 { kakutei = "", mikakutei = "" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "R", shift = True, ctrl = False }
@@ -309,7 +309,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode convertValue
+                                , conversionMode = Skk.MidashiInputMode convertValue
                                 }
                             )
                             (Skk.update skk key).mode
@@ -320,7 +320,7 @@ suite =
                                 { kakutei = "は", mikakutei = "s" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "R", shift = True, ctrl = False }
@@ -328,7 +328,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode convertValue
+                                , conversionMode = Skk.MidashiInputMode convertValue
                                 }
                             )
                             (Skk.update skk key).mode
@@ -339,7 +339,7 @@ suite =
                                 { kakutei = "かきく", mikakutei = "y" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "i", shift = False, ctrl = False }
@@ -347,7 +347,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
+                                , conversionMode =
                                     Skk.MidashiInputMode
                                         { kakutei = "かきくい", mikakutei = "" }
                                 }
@@ -360,7 +360,7 @@ suite =
                                 { kakutei = "ねこ", mikakutei = "cy" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "Enter", shift = False, ctrl = False }
@@ -368,7 +368,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいうねこ"
-                                , convertMode = Skk.KakuteiInputMode { mikakutei = "" }
+                                , conversionMode = Skk.KakuteiInputMode { mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -379,7 +379,7 @@ suite =
                                 { kakutei = "ねこ", mikakutei = "" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
@@ -387,7 +387,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode { kakutei = "ね", mikakutei = "" }
+                                , conversionMode = Skk.MidashiInputMode { kakutei = "ね", mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -398,7 +398,7 @@ suite =
                                 { kakutei = "ね", mikakutei = "t" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
@@ -406,7 +406,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode { kakutei = "ね", mikakutei = "" }
+                                , conversionMode = Skk.MidashiInputMode { kakutei = "ね", mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -417,7 +417,7 @@ suite =
                                 { kakutei = "ねこ", mikakutei = "" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "g", shift = False, ctrl = True }
@@ -425,7 +425,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.KakuteiInputMode { mikakutei = "" }
+                                , conversionMode = Skk.KakuteiInputMode { mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -436,7 +436,7 @@ suite =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
 
                             key =
                                 { key = "Space", shift = False, ctrl = False }
@@ -444,9 +444,9 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode =
-                                    Skk.DictConvertMode
-                                        { prevMode = Skk.PreDictConvertMidashiInputMode convertValue
+                                , conversionMode =
+                                    Skk.DictConversionMode
+                                        { prevMode = Skk.PreDictConversionMidashiInputMode convertValue
                                         , candidateList = [ "今日", "京", "強" ]
                                         , pos = 0
                                         }
@@ -469,7 +469,7 @@ suite =
                                 }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiOkuriInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiOkuriInputMode convertValue })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
@@ -477,7 +477,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiOkuriInputMode { midashi = midashi, head = "", kakutei = "", mikakutei = "" }
+                                , conversionMode = Skk.MidashiOkuriInputMode { midashi = midashi, head = "", kakutei = "", mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -495,7 +495,7 @@ suite =
                                 }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiOkuriInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiOkuriInputMode convertValue })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
@@ -503,7 +503,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiOkuriInputMode { midashi = midashi, head = "t", kakutei = "っ", mikakutei = "" }
+                                , conversionMode = Skk.MidashiOkuriInputMode { midashi = midashi, head = "t", kakutei = "っ", mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -521,7 +521,7 @@ suite =
                                 }
 
                             skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", convertMode = Skk.MidashiOkuriInputMode convertValue })
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiOkuriInputMode convertValue })
 
                             key =
                                 { key = "g", shift = False, ctrl = True }
@@ -529,7 +529,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode midashi
+                                , conversionMode = Skk.MidashiInputMode midashi
                                 }
                             )
                             (Skk.update skk key).mode
@@ -538,11 +538,11 @@ suite =
                 [ test "次の変換候補が存在する場合、Spaceキーを入力すると、次の変換候補が選択されること" <|
                     \_ ->
                         let
-                            preConvertValue =
+                            preConversionValue =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             convertValue =
-                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 0
                                 }
@@ -551,7 +551,7 @@ suite =
                                 initSkk
                                     (Skk.HiraganaMode
                                         { kakutei = "あいう"
-                                        , convertMode = Skk.DictConvertMode convertValue
+                                        , conversionMode = Skk.DictConversionMode convertValue
                                         }
                                     )
 
@@ -561,18 +561,18 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.DictConvertMode { convertValue | pos = 1 }
+                                , conversionMode = Skk.DictConversionMode { convertValue | pos = 1 }
                                 }
                             )
                             (Skk.update skk key).mode
                 , test "次の変換候補が存在しない場合、Spaceキーを入力すると、状態が変わらないこと" <|
                     \_ ->
                         let
-                            preConvertValue =
+                            preConversionValue =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             convertValue =
-                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 2
                                 }
@@ -581,7 +581,7 @@ suite =
                                 initSkk
                                     (Skk.HiraganaMode
                                         { kakutei = "あいう"
-                                        , convertMode = Skk.DictConvertMode convertValue
+                                        , conversionMode = Skk.DictConversionMode convertValue
                                         }
                                     )
 
@@ -594,11 +594,11 @@ suite =
                 , test "前の変換候補が存在する場合、xキーを入力すると、前の変換候補が選択されること" <|
                     \_ ->
                         let
-                            preConvertValue =
+                            preConversionValue =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             convertValue =
-                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 1
                                 }
@@ -607,7 +607,7 @@ suite =
                                 initSkk
                                     (Skk.HiraganaMode
                                         { kakutei = "あいう"
-                                        , convertMode = Skk.DictConvertMode convertValue
+                                        , conversionMode = Skk.DictConversionMode convertValue
                                         }
                                     )
 
@@ -617,18 +617,18 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.DictConvertMode { convertValue | pos = 0 }
+                                , conversionMode = Skk.DictConversionMode { convertValue | pos = 0 }
                                 }
                             )
                             (Skk.update skk key).mode
                 , test "前の変換候補が存在しない場合、xキーを入力すると、直前の変換モードに遷移すること" <|
                     \_ ->
                         let
-                            preConvertValue =
+                            preConversionValue =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             convertValue =
-                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 0
                                 }
@@ -637,7 +637,7 @@ suite =
                                 initSkk
                                     (Skk.HiraganaMode
                                         { kakutei = "あいう"
-                                        , convertMode = Skk.DictConvertMode convertValue
+                                        , conversionMode = Skk.DictConversionMode convertValue
                                         }
                                     )
 
@@ -647,18 +647,18 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode preConvertValue
+                                , conversionMode = Skk.MidashiInputMode preConversionValue
                                 }
                             )
                             (Skk.update skk key).mode
                 , test "Ctrl-gキーを入力すると、直前の変換モードに遷移すること" <|
                     \_ ->
                         let
-                            preConvertValue =
+                            preConversionValue =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             convertValue =
-                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 0
                                 }
@@ -667,7 +667,7 @@ suite =
                                 initSkk
                                     (Skk.HiraganaMode
                                         { kakutei = "あいう"
-                                        , convertMode = Skk.DictConvertMode convertValue
+                                        , conversionMode = Skk.DictConversionMode convertValue
                                         }
                                     )
 
@@ -677,18 +677,18 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
-                                , convertMode = Skk.MidashiInputMode preConvertValue
+                                , conversionMode = Skk.MidashiInputMode preConversionValue
                                 }
                             )
                             (Skk.update skk key).mode
                 , test "Enterキーを入力すると、選択中の変換候補を確定済みの文字列の末尾に追加すること" <|
                     \_ ->
                         let
-                            preConvertValue =
+                            preConversionValue =
                                 { kakutei = "きょう", mikakutei = "" }
 
                             convertValue =
-                                { prevMode = Skk.PreDictConvertMidashiInputMode preConvertValue
+                                { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 1
                                 }
@@ -697,7 +697,7 @@ suite =
                                 initSkk
                                     (Skk.HiraganaMode
                                         { kakutei = "あいう"
-                                        , convertMode = Skk.DictConvertMode convertValue
+                                        , conversionMode = Skk.DictConversionMode convertValue
                                         }
                                     )
 
@@ -707,7 +707,7 @@ suite =
                         Expect.equal
                             (Skk.HiraganaMode
                                 { kakutei = "あいう京"
-                                , convertMode = Skk.KakuteiInputMode { mikakutei = "" }
+                                , conversionMode = Skk.KakuteiInputMode { mikakutei = "" }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -717,112 +717,112 @@ suite =
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在する場合、BSキーを入力すると、未確定文字列の末尾文字が削除されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
 
                             key =
                                 { key = "BackSpace", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
                 , test "Spaceキーを入力すると、確定済み文字列の末尾にスペースが追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = " ", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "ローマ字からカタカナへの変換ルールが部分的に存在する場合は、未確定の文字列の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = "y", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "sy" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "sy" } }) (Skk.update skk key).mode
                 , test "ローマ字からカタカナへの変換ルールが存在する場合は、確定済みの文字列の末尾に変換結果が追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "sy" } })
 
                             key =
                                 { key = "a", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウシャ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウシャ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "ローマ字からカタカナへの変換ルールが存在する かつ 次の文字が存在する場合は、確定済みの文字列の末尾に変換結果が追加される かつ 未確定の文字列に次の文字が設定されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = "s", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウッ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウッ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } }) (Skk.update skk key).mode
                 , test "ローマ字からカタカナへの変換ルールが存在しない かつ 入力した文字が未確定の場合は、未確定の文字列に入力したキーが設定されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "s" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "s" } })
 
                             key =
                                 { key = "b", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "b" } }) (Skk.update skk key).mode
                 , test "ローマ字からカタカナへの変換ルールが存在しない かつ 入力した文字が確定する場合は、確定済みの文字列の末尾に入力したキーが追加されること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "y" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "y" } })
 
                             key =
                                 { key = "i", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウイ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウイ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "qキーを入力するとひらがなモードに遷移すること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
 
                             key =
                                 { key = "q", shift = False, ctrl = False }
                         in
-                        Expect.equal (Skk.HiraganaMode { kakutei = "アイウ", convertMode = KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.HiraganaMode { kakutei = "アイウ", conversionMode = KakuteiInputMode { mikakutei = "" } }) (Skk.update skk key).mode
                 , test "アルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "" } })
 
                             key =
                                 { key = "S", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.MidashiInputMode { kakutei = "", mikakutei = "s" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.MidashiInputMode { kakutei = "", mikakutei = "s" } }) (Skk.update skk key).mode
                 , test "未確定の文字列が存在すると時にアルファベットの大文字を入力すると見出し語入力モードに遷移すること" <|
                     \_ ->
                         let
                             skk =
-                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
+                                initSkk (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.KakuteiInputMode { mikakutei = "sh" } })
 
                             key =
                                 { key = "A", shift = True, ctrl = False }
                         in
-                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", convertMode = Skk.MidashiInputMode { kakutei = "シャ", mikakutei = "" } }) (Skk.update skk key).mode
+                        Expect.equal (Skk.KatakanaMode { kakutei = "アイウ", conversionMode = Skk.MidashiInputMode { kakutei = "シャ", mikakutei = "" } }) (Skk.update skk key).mode
                 ]
             ]
         ]
