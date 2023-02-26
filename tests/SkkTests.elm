@@ -430,6 +430,7 @@ suite =
                                         { prevMode = Skk.PreDictConversionMidashiInputMode convertValue
                                         , candidateList = [ "今日", "京", "強" ]
                                         , pos = 0
+                                        , okuri = Nothing
                                         }
                                 }
                             )
@@ -541,6 +542,7 @@ suite =
                                         { prevMode = Skk.PreDictConversionMidashiInputMode convertValue.midashi
                                         , pos = 0
                                         , candidateList = [ "走", "奔" ]
+                                        , okuri = Just "る"
                                         }
                                 }
                             )
@@ -557,6 +559,7 @@ suite =
                                 { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 0
+                                , okuri = Nothing
                                 }
 
                             skk =
@@ -587,6 +590,7 @@ suite =
                                 { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 2
+                                , okuri = Nothing
                                 }
 
                             skk =
@@ -613,6 +617,7 @@ suite =
                                 { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 1
+                                , okuri = Nothing
                                 }
 
                             skk =
@@ -643,6 +648,7 @@ suite =
                                 { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 0
+                                , okuri = Nothing
                                 }
 
                             skk =
@@ -673,6 +679,7 @@ suite =
                                 { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 0
+                                , okuri = Nothing
                                 }
 
                             skk =
@@ -703,6 +710,7 @@ suite =
                                 { prevMode = Skk.PreDictConversionMidashiInputMode preConversionValue
                                 , candidateList = [ "今日", "京", "強" ]
                                 , pos = 1
+                                , okuri = Nothing
                                 }
 
                             skk =

@@ -76,6 +76,7 @@ type alias DictConversionModeValue =
     { prevMode : SkkPrevDictConversionMode -- 辞書変換前のモード
     , candidateList : SkkDict.SkkDictCandidateList -- 変換候補の一覧
     , pos : Int -- 変換候補の位置
+    , okuri : Maybe String -- 送り仮名。"走る" を変換している場合は "る"
     }
 
 
@@ -321,7 +322,7 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
             Just candidateList ->
                 buildKanaMode isHiragana
                     kakutei
-                    (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0 })
+                    (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0, okuri = Nothing })
 
             Nothing ->
                 -- TODO: 変換候補がない場合に、辞書登録モードに移行
@@ -390,7 +391,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
                 Just candidateList ->
                     buildKanaMode isHiragana
                         kakutei
-                        (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0 })
+                        (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0, okuri = Just newOkuriKakutei })
 
                 Nothing ->
                     -- TODO: 変換候補がない場合に、辞書登録モードに移行
@@ -425,7 +426,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
 
 
 updateDictConversionMode : { isHiragana : Bool, kakutei : String, conversionModeValue : DictConversionModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
-updateDictConversionMode { isHiragana, kakutei, conversionModeValue, context, inputKey } =
+updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } =
     let
         -- 直前の変換モード
         previousConversionMode : SkkInputMode
