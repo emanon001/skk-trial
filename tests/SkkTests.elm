@@ -496,9 +496,9 @@ suite =
 
                             convertValue =
                                 { midashi = midashi
-                                , head = ""
-                                , kakutei = "t"
-                                , mikakutei = ""
+                                , head = "t"
+                                , kakutei = ""
+                                , mikakutei = "t"
                                 }
 
                             skk =
@@ -511,6 +511,37 @@ suite =
                             (Skk.HiraganaMode
                                 { kakutei = "あいう"
                                 , conversionMode = Skk.MidashiInputMode midashi
+                                }
+                            )
+                            (Skk.update skk key).mode
+                , test "送り仮名が確定すると、辞書変換モードに遷移すること" <|
+                    \_ ->
+                        let
+                            midashi =
+                                { kakutei = "はし", mikakutei = "" }
+
+                            convertValue =
+                                { midashi = midashi
+                                , head = "r"
+                                , kakutei = ""
+                                , mikakutei = "r"
+                                }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiOkuriInputMode convertValue })
+
+                            key =
+                                { key = "u", shift = False, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = "あいう"
+                                , conversionMode =
+                                    Skk.DictConversionMode
+                                        { prevMode = Skk.PreDictConversionMidashiInputMode convertValue.midashi
+                                        , pos = 0
+                                        , candidateList = [ "走", "奔" ]
+                                        }
                                 }
                             )
                             (Skk.update skk key).mode
@@ -821,6 +852,7 @@ initSkk mode =
             ねこ /猫/
             だいすk /大好/
             きょう /今日/京/強/
+            はしr /走/奔/
             """
     in
     { mode = mode

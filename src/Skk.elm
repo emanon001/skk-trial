@@ -70,11 +70,10 @@ type alias MidashiOkuriInputModeValue =
 
 type SkkPrevDictConversionMode
     = PreDictConversionMidashiInputMode MidashiInputModeValue
-    | PreDictConversionMidashiOkuriInputMode MidashiOkuriInputModeValue
 
 
 type alias DictConversionModeValue =
-    { prevMode : SkkPrevDictConversionMode -- 辞書変換直前のモード
+    { prevMode : SkkPrevDictConversionMode -- 辞書変換前のモード
     , candidateList : SkkDict.SkkDictCandidateList -- 変換候補の一覧
     , pos : Int -- 変換候補の位置
     }
@@ -359,7 +358,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
         -- TODO: かな変換を試みる
         -- TODO: 辞書変換モードに遷移
         let
-            newHead =
+            newOkuriHead =
                 if String.isEmpty conversionModeValue.head then
                     inputKey.key
 
@@ -371,16 +370,37 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
 
             newOkuriKakutei =
                 conversionModeValue.kakutei ++ okuriKakutei2
+
+            isOkuriKakutei =
+                not (String.isEmpty newOkuriKakutei) && String.isEmpty newOkuriMikakutei
         in
-        if not (String.isEmpty newOkuriKakutei) && String.isEmpty newOkuriMikakutei then
+        if isOkuriKakutei then
             -- 送り仮名が確定した
-            -- TODO: 実装
-            default
+            let
+                prevMode =
+                    PreDictConversionMidashiInputMode conversionModeValue.midashi
+
+                searchKey =
+                    conversionModeValue.midashi.kakutei ++ newOkuriHead
+
+                canditateList =
+                    SkkDict.getCandidateList searchKey context.dict
+            in
+            case canditateList of
+                Just candidateList ->
+                    buildKanaMode isHiragana
+                        kakutei
+                        (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0 })
+
+                Nothing ->
+                    -- TODO: 変換候補がない場合に、辞書登録モードに移行
+                    default
 
         else
             -- 送り仮名が確定していない
-            -- TODO: 実装
-            default
+            buildKanaMode isHiragana
+                kakutei
+                (MidashiOkuriInputMode { conversionModeValue | head = newOkuriHead, kakutei = newOkuriKakutei, mikakutei = newOkuriMikakutei })
 
     else if isBackSpaceKey inputKey then
         -- 削除
@@ -419,9 +439,6 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, context, in
                 (case prevMode of
                     PreDictConversionMidashiInputMode v ->
                         MidashiInputMode v
-
-                    PreDictConversionMidashiOkuriInputMode v ->
-                        MidashiOkuriInputMode v
                 )
 
         -- デフォルト値
@@ -472,10 +489,6 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, context, in
         case prevMode of
             PreDictConversionMidashiInputMode _ ->
                 buildKanaMode isHiragana (kakutei ++ converted) (KakuteiInputMode { mikakutei = "" })
-
-            PreDictConversionMidashiOkuriInputMode _ ->
-                -- TODO: 送り仮名に対応
-                default
 
     else
         -- ignore
