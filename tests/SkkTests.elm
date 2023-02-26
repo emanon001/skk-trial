@@ -353,25 +353,6 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
-                , test "見出し語を入力中にEnterキーを入力すると、確定済みの文字列の末尾に確定した見出し語が追加され、確定入力モードに遷移すること" <|
-                    \_ ->
-                        let
-                            convertValue =
-                                { kakutei = "ねこ", mikakutei = "cy" }
-
-                            skk =
-                                initSkk (Skk.HiraganaMode { kakutei = "あいう", conversionMode = Skk.MidashiInputMode convertValue })
-
-                            key =
-                                { key = "Enter", shift = False, ctrl = False }
-                        in
-                        Expect.equal
-                            (Skk.HiraganaMode
-                                { kakutei = "あいうねこ"
-                                , conversionMode = Skk.KakuteiInputMode { mikakutei = "" }
-                                }
-                            )
-                            (Skk.update skk key).mode
                 , test "未確定の見出し語が存在しない場合、BSキーを入力すると確定済みの見出し語が削除されること" <|
                     \_ ->
                         let

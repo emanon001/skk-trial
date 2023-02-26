@@ -328,11 +328,6 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
                 -- TODO: 変換候補がない場合に、辞書登録モードに移行
                 default
 
-    else if isEnterKey inputKey then
-        -- 確定
-        -- あいう▽ねこ + Enter → あいうねこ
-        buildKanaMode isHiragana (kakutei ++ conversionModeValue.kakutei) initKakuteiInputMode
-
     else if isBackSpaceKey inputKey then
         -- 削除
         -- ▽ねこ + BS → ▽ね
