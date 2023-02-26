@@ -356,8 +356,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
         buildKanaMode isHiragana kakutei (MidashiInputMode conversionModeValue.midashi)
 
     else if isKanaConversionAcceptedKey inputKey then
-        -- TODO: かな変換を試みる
-        -- TODO: 辞書変換モードに遷移
+        -- かな変換を試みる
         let
             newOkuriHead =
                 if String.isEmpty conversionModeValue.head then
