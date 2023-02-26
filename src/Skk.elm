@@ -276,25 +276,21 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
             head =
                 String.toLower inputKey.key
         in
-        case ( conversionModeValue.kakutei, conversionModeValue.mikakutei ) of
-            ( "", _ ) ->
-                -- 確定済みの文字列が存在しない
-                default
+        if not (String.isEmpty conversionModeValue.kakutei) && String.isEmpty conversionModeValue.mikakutei then
+            -- 見出し語が確定している
+            -- NOTE: 入力したキー(母音以外のアルファベット)によって送り仮名が確定する可能性は考慮しない
+            buildKanaMode isHiragana
+                kakutei
+                (MidashiOkuriInputMode
+                    { midashi = conversionModeValue
+                    , head = head
+                    , mikakutei = head
+                    , kakutei = ""
+                    }
+                )
 
-            ( _, "" ) ->
-                -- 確定済みの文字列のみ存在する
-                buildKanaMode isHiragana
-                    kakutei
-                    (MidashiOkuriInputMode
-                        { midashi = conversionModeValue
-                        , head = head
-                        , mikakutei = head
-                        , kakutei = ""
-                        }
-                    )
-
-            _ ->
-                default
+        else
+            default
 
     else if isCancelKey inputKey then
         -- キャンセル
@@ -367,7 +363,29 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
     else if isKanaConversionAcceptedKey inputKey then
         -- TODO: かな変換を試みる
         -- TODO: 辞書変換モードに遷移
-        default
+        let
+            newHead =
+                if String.isEmpty conversionModeValue.head then
+                    inputKey.key
+
+                else
+                    conversionModeValue.head
+
+            ( okuriKakutei2, newOkuriMikakutei ) =
+                convertToKana isHiragana conversionModeValue.mikakutei inputKey.key context.kanaRules
+
+            newOkuriKakutei =
+                conversionModeValue.kakutei ++ okuriKakutei2
+        in
+        if not (String.isEmpty newOkuriKakutei) && String.isEmpty newOkuriMikakutei then
+            -- 送り仮名が確定した
+            -- TODO: 実装
+            default
+
+        else
+            -- 送り仮名が確定していない
+            -- TODO: 実装
+            default
 
     else if isBackSpaceKey inputKey then
         -- 削除
