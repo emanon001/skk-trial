@@ -20,6 +20,10 @@ type alias SkkContext =
     }
 
 
+
+---- 入力モード
+
+
 type SkkInputMode
     = AsciiMode AsciiModeValue -- Ascii文字を入力するモード
     | HiraganaMode HiraganaModeValue -- ひらがなを入力するモード
@@ -41,6 +45,10 @@ type alias KatakanaModeValue =
     { kakutei : Maybe String
     , conversionMode : SkkConversionMode
     }
+
+
+
+---- 変換モード
 
 
 type SkkConversionMode
@@ -92,7 +100,7 @@ type alias SkkInputKey =
 
 
 
--- factory
+---- factory
 
 
 init : SkkContext -> Skk
@@ -103,7 +111,7 @@ init context =
 
 
 
--- update
+---- update
 
 
 update : Skk -> SkkInputKey -> Skk
@@ -493,7 +501,7 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
 
 
 
--- convert kana
+---- convert
 
 
 convertToKana : Bool -> Maybe String -> String -> SkkKanaRule.SkkKanaRules -> ( Maybe String, Maybe String )
@@ -566,7 +574,7 @@ concatInputString s1 s2 =
 
 
 
--- factory(internal)
+---- factory(internal)
 
 
 initKakuteiInputMode : SkkConversionMode
@@ -589,8 +597,8 @@ buildKanaMode isHiragana kakutei conversionMode =
 
 
 
--- key check functions
--- ref. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
+---- key check functions
+---- ref. https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
 
 
 isSwitchToHiraganaModeKey : SkkInputKey -> Bool
