@@ -544,7 +544,7 @@ deleteInputString str =
 
 deleteMaybeInputString : Maybe String -> Maybe String
 deleteMaybeInputString =
-    Maybe.andThen <| dropRight 1 >> toInputString
+    Maybe.andThen deleteInputString
 
 
 deleteInputConversionString : Maybe String -> Maybe String -> ( Maybe String, Maybe String )
