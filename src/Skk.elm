@@ -1,6 +1,7 @@
 module Skk exposing (Skk, SkkContext, SkkConversionMode(..), SkkInputKey, SkkInputMode(..), SkkPrevDictConversionMode(..), init, update)
 
 import Array
+import Maybe.Extra exposing (isJust, isNothing)
 import Regex
 import SkkDict
 import SkkKanaRule
@@ -26,18 +27,18 @@ type SkkInputMode
 
 
 type alias AsciiModeValue =
-    { kakutei : String
+    { kakutei : Maybe String
     }
 
 
 type alias HiraganaModeValue =
-    { kakutei : String
+    { kakutei : Maybe String
     , conversionMode : SkkConversionMode
     }
 
 
 type alias KatakanaModeValue =
-    { kakutei : String
+    { kakutei : Maybe String
     , conversionMode : SkkConversionMode
     }
 
@@ -50,21 +51,21 @@ type SkkConversionMode
 
 
 type alias KakuteiInputModeValue =
-    { mikakutei : String
+    { mikakutei : Maybe String
     }
 
 
 type alias MidashiInputModeValue =
-    { kakuteiMidashi : String -- 確定した見出し語
-    , mikakuteiMidashi : String -- 未確定の見出し語
+    { kakuteiMidashi : Maybe String -- 確定した見出し語
+    , mikakuteiMidashi : Maybe String -- 未確定の見出し語
     }
 
 
 type alias MidashiOkuriInputModeValue =
     { midashi : MidashiInputModeValue -- 見出し語。"▽たたか*っt" の場合は "たたか"
-    , headOkuri : String -- 送り仮名の最初のローマ字。"▽たたか*っt" の場合は "っ" を構成する "t"
-    , kakuteiOkuri : String -- 確定した送り仮名。"▽たたか*っt" の場合は "っ"
-    , mikakuteiOkuri : String -- 未確定の送り仮名。"▽たたか*っt" の場合は "t"
+    , headOkuri : Maybe String -- 送り仮名の最初のローマ字。"▽たたか*っt" の場合は "っ" を構成する "t"
+    , kakuteiOkuri : Maybe String -- 確定した送り仮名。"▽たたか*っt" の場合は "っ"
+    , mikakuteiOkuri : Maybe String -- 未確定の送り仮名。"▽たたか*っt" の場合は "t"
     }
 
 
@@ -96,7 +97,7 @@ type alias SkkInputKey =
 
 init : SkkContext -> Skk
 init context =
-    { mode = AsciiMode { kakutei = "" }
+    { mode = AsciiMode { kakutei = Nothing }
     , context = context
     }
 
@@ -134,10 +135,10 @@ updateAsciiMode { inputModeValue, inputKey } =
         HiraganaMode { kakutei = inputModeValue.kakutei, conversionMode = initKakuteiInputMode }
 
     else if Regex.contains asciiRegex inputKey.key then
-        AsciiMode { kakutei = inputModeValue.kakutei ++ inputKey.key }
+        AsciiMode { kakutei = concatInputString inputModeValue.kakutei (Just inputKey.key) }
 
     else if isBackSpaceKey inputKey then
-        AsciiMode { kakutei = String.dropRight 1 inputModeValue.kakutei }
+        AsciiMode { kakutei = deleteMaybeInputString inputModeValue.kakutei }
 
     else
         -- ignore
@@ -202,7 +203,7 @@ updateKanaMode { isHiragana, inputModeValue, context, inputKey } =
 -- update 変換モード
 
 
-updateKanaKakuteiInputMode : { isHiragana : Bool, kakutei : String, conversionModeValue : KakuteiInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateKanaKakuteiInputMode : { isHiragana : Bool, kakutei : Maybe String, conversionModeValue : KakuteiInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateKanaKakuteiInputMode { isHiragana, kakutei, conversionModeValue, context, inputKey } =
     let
         -- デフォルト値
@@ -234,11 +235,11 @@ updateKanaKakuteiInputMode { isHiragana, kakutei, conversionModeValue, context, 
         -- ひらがなモードとカタカナモードの切り替え
         if isHiragana then
             -- ひらがな → カタカナ
-            KatakanaMode { kakutei = kakutei, conversionMode = buildKakuteiInputMode "" }
+            KatakanaMode { kakutei = kakutei, conversionMode = buildKakuteiInputMode Nothing }
 
         else
             -- カタカナ → ひらがな
-            HiraganaMode { kakutei = kakutei, conversionMode = buildKakuteiInputMode "" }
+            HiraganaMode { kakutei = kakutei, conversionMode = buildKakuteiInputMode Nothing }
 
     else if isKanaConversionAcceptedKey inputKey then
         -- かな変換を試みる
@@ -246,13 +247,13 @@ updateKanaKakuteiInputMode { isHiragana, kakutei, conversionModeValue, context, 
             ( kakutei2, mikakutei ) =
                 convertToKana isHiragana conversionModeValue.mikakutei inputKey.key context.kanaRules
         in
-        buildKanaMode isHiragana (kakutei ++ kakutei2) (buildKakuteiInputMode mikakutei)
+        buildKanaMode isHiragana (concatInputString kakutei kakutei2) (buildKakuteiInputMode mikakutei)
 
     else if isBackSpaceKey inputKey then
         -- 削除
         let
             ( newKakutei, newMikakutei ) =
-                deleteInputChar kakutei conversionModeValue.mikakutei
+                deleteInputConversionString kakutei conversionModeValue.mikakutei
         in
         buildKanaMode isHiragana newKakutei (buildKakuteiInputMode newMikakutei)
 
@@ -261,7 +262,7 @@ updateKanaKakuteiInputMode { isHiragana, kakutei, conversionModeValue, context, 
         default
 
 
-updateMidashiInputMode : { isHiragana : Bool, kakutei : String, conversionModeValue : MidashiInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateMidashiInputMode : { isHiragana : Bool, kakutei : Maybe String, conversionModeValue : MidashiInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inputKey } =
     let
         -- デフォルト値
@@ -276,16 +277,16 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
             head =
                 String.toLower inputKey.key
         in
-        if not (String.isEmpty conversionModeValue.kakuteiMidashi) && String.isEmpty conversionModeValue.mikakuteiMidashi then
+        if isJust conversionModeValue.kakuteiMidashi && isNothing conversionModeValue.mikakuteiMidashi then
             -- 見出し語が確定している
             -- NOTE: 入力したキー(母音以外のアルファベット)によって送り仮名が確定する可能性は考慮しない
             buildKanaMode isHiragana
                 kakutei
                 (MidashiOkuriInputMode
                     { midashi = conversionModeValue
-                    , headOkuri = head
-                    , mikakuteiOkuri = head
-                    , kakuteiOkuri = ""
+                    , headOkuri = Just head
+                    , mikakuteiOkuri = Just head
+                    , kakuteiOkuri = Nothing
                     }
                 )
 
@@ -306,17 +307,17 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
         in
         buildKanaMode isHiragana
             kakutei
-            (MidashiInputMode { kakuteiMidashi = conversionModeValue.kakuteiMidashi ++ kakutei2, mikakuteiMidashi = mikakutei })
+            (MidashiInputMode { kakuteiMidashi = concatInputString conversionModeValue.kakuteiMidashi kakutei2, mikakuteiMidashi = mikakutei })
 
     else if isConversionKey inputKey then
         -- 変換開始
         -- ▽ねこ + Space → ▼猫
         let
             prevMode =
-                PreDictConversionMidashiInputMode { conversionModeValue | mikakuteiMidashi = "" }
+                PreDictConversionMidashiInputMode { conversionModeValue | mikakuteiMidashi = Nothing }
 
             canditateList =
-                SkkDict.getCandidateList conversionModeValue.kakuteiMidashi context.dict
+                SkkDict.getCandidateList (Maybe.withDefault "" conversionModeValue.kakuteiMidashi) context.dict
         in
         case canditateList of
             Just candidateList ->
@@ -333,7 +334,7 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
         -- ▽ねこ + BS → ▽ね
         let
             ( newKakutei, newMikakutei ) =
-                deleteInputChar conversionModeValue.kakuteiMidashi conversionModeValue.mikakuteiMidashi
+                deleteInputConversionString conversionModeValue.kakuteiMidashi conversionModeValue.mikakuteiMidashi
         in
         buildKanaMode isHiragana kakutei (MidashiInputMode { kakuteiMidashi = newKakutei, mikakuteiMidashi = newMikakutei })
 
@@ -342,7 +343,7 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
         default
 
 
-updateMidashiOkuriInputMode : { isHiragana : Bool, kakutei : String, conversionModeValue : MidashiOkuriInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateMidashiOkuriInputMode : { isHiragana : Bool, kakutei : Maybe String, conversionModeValue : MidashiOkuriInputModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context, inputKey } =
     let
         -- デフォルト値
@@ -359,20 +360,16 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
         -- かな変換を試みる
         let
             newOkuriHead =
-                if String.isEmpty conversionModeValue.headOkuri then
-                    inputKey.key
-
-                else
-                    conversionModeValue.headOkuri
+                Just (Maybe.withDefault inputKey.key conversionModeValue.headOkuri)
 
             ( okuriKakutei2, newOkuriMikakutei ) =
                 convertToKana isHiragana conversionModeValue.mikakuteiOkuri inputKey.key context.kanaRules
 
             newOkuriKakutei =
-                conversionModeValue.kakuteiOkuri ++ okuriKakutei2
+                concatInputString conversionModeValue.kakuteiOkuri okuriKakutei2
 
             isOkuriKakutei =
-                not (String.isEmpty newOkuriKakutei) && String.isEmpty newOkuriMikakutei
+                isJust newOkuriKakutei && isNothing newOkuriMikakutei
         in
         if isOkuriKakutei then
             -- 送り仮名が確定した
@@ -381,7 +378,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
                     PreDictConversionMidashiInputMode conversionModeValue.midashi
 
                 searchKey =
-                    conversionModeValue.midashi.kakuteiMidashi ++ newOkuriHead
+                    Maybe.withDefault "" (concatInputString conversionModeValue.midashi.kakuteiMidashi newOkuriHead)
 
                 canditateList =
                     SkkDict.getCandidateList searchKey context.dict
@@ -390,7 +387,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
                 Just candidateList ->
                     buildKanaMode isHiragana
                         kakutei
-                        (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0, okuri = Just newOkuriKakutei })
+                        (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0, okuri = newOkuriKakutei })
 
                 Nothing ->
                     -- TODO: 変換候補がない場合に、辞書登録モードに移行
@@ -408,11 +405,11 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
         -- ▽はし*っt + BS → ▽はし*っ
         let
             ( newKakutei, newMikakutei ) =
-                deleteInputChar conversionModeValue.kakuteiOkuri conversionModeValue.mikakuteiOkuri
+                deleteInputConversionString conversionModeValue.kakuteiOkuri conversionModeValue.mikakuteiOkuri
 
             newHead =
-                if newKakutei == "" && newMikakutei == "" then
-                    ""
+                if isNothing newKakutei && isNothing newMikakutei then
+                    Nothing
 
                 else
                     conversionModeValue.headOkuri
@@ -424,7 +421,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
         default
 
 
-updateDictConversionMode : { isHiragana : Bool, kakutei : String, conversionModeValue : DictConversionModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateDictConversionMode : { isHiragana : Bool, kakutei : Maybe String, conversionModeValue : DictConversionModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } =
     let
         -- 直前の変換モード
@@ -484,11 +481,11 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
                 conversionModeValue
 
             converted =
-                Array.fromList candidateList |> Array.get pos |> Maybe.withDefault ""
+                Array.fromList candidateList |> Array.get pos
         in
         case prevMode of
             PreDictConversionMidashiInputMode _ ->
-                buildKanaMode isHiragana (kakutei ++ converted) (KakuteiInputMode { mikakutei = "" })
+                buildKanaMode isHiragana (concatInputString kakutei converted) (KakuteiInputMode { mikakutei = Nothing })
 
     else
         -- ignore
@@ -499,45 +496,73 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
 -- convert kana
 
 
-convertToKana : Bool -> String -> String -> SkkKanaRule.SkkKanaRules -> ( String, String )
+convertToKana : Bool -> Maybe String -> String -> SkkKanaRule.SkkKanaRules -> ( Maybe String, Maybe String )
 convertToKana isHiragana currentKey addtionalKey rules =
     let
         searchKey =
-            currentKey ++ addtionalKey
+            concatInputString currentKey (Just addtionalKey) |> Maybe.withDefault ""
     in
     case SkkKanaRule.search searchKey rules of
         SkkKanaRule.PartialMatch ->
-            ( "", searchKey )
+            ( Nothing, Just searchKey )
 
         SkkKanaRule.PerfectMatch { hiragana, katakana, next } ->
             if isHiragana then
-                ( hiragana, Maybe.withDefault "" next )
+                ( Just hiragana, next )
 
             else
-                ( katakana, Maybe.withDefault "" next )
+                ( Just katakana, next )
 
         SkkKanaRule.NoMatch ->
-            if String.isEmpty currentKey then
+            if isNothing currentKey then
                 -- ルールに存在しない検索キーは変換後の文字列として扱う
                 -- e.g. 数字、クォート
-                ( addtionalKey, "" )
+                ( Just addtionalKey, Nothing )
 
             else
                 -- 未確定文字列を初期化して再度変換を行う
-                convertToKana isHiragana "" addtionalKey rules
+                convertToKana isHiragana Nothing addtionalKey rules
 
 
 
--- delete char
+---- input string functions
 
 
-deleteInputChar : String -> String -> ( String, String )
-deleteInputChar kakutei mikakutei =
-    if String.isEmpty mikakutei then
-        ( dropRight 1 kakutei, mikakutei )
+toInputString : String -> Maybe String
+toInputString s =
+    if String.isEmpty s then
+        Nothing
 
     else
-        ( kakutei, dropRight 1 mikakutei )
+        Just s
+
+
+deleteInputString : String -> Maybe String
+deleteInputString str =
+    dropRight 1 str |> toInputString
+
+
+deleteMaybeInputString : Maybe String -> Maybe String
+deleteMaybeInputString =
+    Maybe.andThen <| dropRight 1 >> toInputString
+
+
+deleteInputConversionString : Maybe String -> Maybe String -> ( Maybe String, Maybe String )
+deleteInputConversionString kakutei mikakutei =
+    case ( kakutei, mikakutei ) of
+        ( k, Just s ) ->
+            ( k, deleteInputString s )
+
+        ( Just s, m ) ->
+            ( deleteInputString s, m )
+
+        _ ->
+            ( kakutei, mikakutei )
+
+
+concatInputString : Maybe String -> Maybe String -> Maybe String
+concatInputString s1 s2 =
+    Maybe.withDefault "" s1 ++ Maybe.withDefault "" s2 |> toInputString
 
 
 
@@ -546,15 +571,15 @@ deleteInputChar kakutei mikakutei =
 
 initKakuteiInputMode : SkkConversionMode
 initKakuteiInputMode =
-    buildKakuteiInputMode ""
+    buildKakuteiInputMode Nothing
 
 
-buildKakuteiInputMode : String -> SkkConversionMode
+buildKakuteiInputMode : Maybe String -> SkkConversionMode
 buildKakuteiInputMode mikakutei =
     KakuteiInputMode { mikakutei = mikakutei }
 
 
-buildKanaMode : Bool -> String -> SkkConversionMode -> SkkInputMode
+buildKanaMode : Bool -> Maybe String -> SkkConversionMode -> SkkInputMode
 buildKanaMode isHiragana kakutei conversionMode =
     if isHiragana then
         HiraganaMode { kakutei = kakutei, conversionMode = conversionMode }
