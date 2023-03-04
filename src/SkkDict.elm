@@ -1,6 +1,8 @@
 module SkkDict exposing (SkkDict, SkkDictCandidateList, SkkDictKey, fromDictString, getCandidateList)
 
 import Dict exposing (Dict)
+import List
+import Maybe.Extra
 
 
 
@@ -62,6 +64,21 @@ fromDictString dictStr =
 -- get
 
 
-getCandidateList : SkkDictKey -> SkkDict -> Maybe SkkDictCandidateList
-getCandidateList key dict =
-    Dict.get key dict
+getCandidateList : SkkDictKey -> List SkkDict -> Maybe SkkDictCandidateList
+getCandidateList key dictList =
+    case dictList of
+        [] ->
+            Nothing
+
+        dict :: [] ->
+            Dict.get key dict
+
+        dict :: rest ->
+            let
+                list1 =
+                    Dict.get key dict
+
+                list2 =
+                    getCandidateList key rest
+            in
+            Maybe.Extra.combine [ list1, list2 ] |> Maybe.map List.concat

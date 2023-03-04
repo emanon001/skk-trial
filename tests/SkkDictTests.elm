@@ -59,12 +59,20 @@ suite =
                             きょう /今日/京/強/
                             """
 
+                        dictStr2 =
+                            """
+                            きょう /卿/狂/
+                            """
+
                         dict =
                             SkkDict.fromDictString dictStr
+
+                        dict2 =
+                            SkkDict.fromDictString dictStr2
                     in
                     Expect.equal
-                        (Just [ "今日", "京", "強" ])
-                        (SkkDict.getCandidateList "きょう" dict)
+                        (Just [ "今日", "京", "強", "卿", "狂" ])
+                        (SkkDict.getCandidateList "きょう" [ dict, dict2 ])
             , test "存在しないキーを指定するとNothingを返すこと" <|
                 \_ ->
                     let
@@ -75,11 +83,19 @@ suite =
                             きょう /今日/京/強/
                             """
 
+                        dictStr2 =
+                            """
+                            きょう /卿/狂/
+                            """
+
                         dict =
                             SkkDict.fromDictString dictStr
+
+                        dict2 =
+                            SkkDict.fromDictString dictStr2
                     in
                     Expect.equal
                         Nothing
-                        (SkkDict.getCandidateList "存在しないキー" dict)
+                        (SkkDict.getCandidateList "存在しないキー" [ dict, dict2 ])
             ]
         ]
