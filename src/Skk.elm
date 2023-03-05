@@ -199,38 +199,38 @@ updateKatakanaMode { inputModeValue, context, inputKey } =
 updateKanaMode : { isHiragana : Bool, inputModeValue : KatakanaModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
 updateKanaMode { isHiragana, inputModeValue, context, inputKey } =
     case inputModeValue.conversionMode of
-        KakuteiInputMode convertValue ->
+        KakuteiInputMode conversionValue ->
             updateKanaKakuteiInputMode
                 { isHiragana = isHiragana
                 , kakutei = inputModeValue.kakutei
-                , conversionModeValue = convertValue
+                , conversionModeValue = conversionValue
                 , context = context
                 , inputKey = inputKey
                 }
 
-        MidashiInputMode convertValue ->
+        MidashiInputMode conversionValue ->
             updateMidashiInputMode
                 { isHiragana = isHiragana
                 , kakutei = inputModeValue.kakutei
-                , conversionModeValue = convertValue
+                , conversionModeValue = conversionValue
                 , context = context
                 , inputKey = inputKey
                 }
 
-        MidashiOkuriInputMode convertValue ->
+        MidashiOkuriInputMode conversionValue ->
             updateMidashiOkuriInputMode
                 { isHiragana = isHiragana
                 , kakutei = inputModeValue.kakutei
-                , conversionModeValue = convertValue
+                , conversionModeValue = conversionValue
                 , context = context
                 , inputKey = inputKey
                 }
 
-        DictConversionMode convertValue ->
+        DictConversionMode conversionValue ->
             updateDictConversionMode
                 { isHiragana = isHiragana
                 , kakutei = inputModeValue.kakutei
-                , conversionModeValue = convertValue
+                , conversionModeValue = conversionValue
                 , context = context
                 , inputKey = inputKey
                 }
