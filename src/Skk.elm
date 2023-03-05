@@ -539,7 +539,7 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
 
 
 updateDictRegistrationMode : { isHiragana : Bool, kakutei : Maybe String, conversionModeValue : DictRegistrationModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
-updateDictRegistrationMode { isHiragana, kakutei, conversionModeValue, inputKey } =
+updateDictRegistrationMode { isHiragana, kakutei, conversionModeValue, context, inputKey } =
     let
         -- 直前の変換モード
         previousConversionMode : SkkInputMode
@@ -555,22 +555,36 @@ updateDictRegistrationMode { isHiragana, kakutei, conversionModeValue, inputKey 
                         MidashiInputMode v
                 )
 
+        -- TODO: キャンセル可能か
+        canCancel : Bool
+        canCancel =
+            False
+
+        -- TODO: 確定可能か
+        canEnter : Bool
+        canEnter =
+            False
+
         -- デフォルト値
         default : SkkInputMode
         default =
             buildKanaMode isHiragana kakutei (DictRegistrationMode conversionModeValue)
     in
-    if isCancelKey inputKey then
+    if isCancelKey inputKey && canCancel then
         -- キャンセル
         previousConversionMode
 
-    else if isEnterKey inputKey then
+    else if isEnterKey inputKey && canEnter then
         -- TODO: 確定
         default
 
     else
-        -- ignore
-        default
+        -- 辞書登録用の入力モードに処理を移譲する
+        let
+            newSkk =
+                update { mode = conversionModeValue.inputMode, context = context } inputKey
+        in
+        buildKanaMode isHiragana kakutei (DictRegistrationMode { conversionModeValue | inputMode = newSkk.mode })
 
 
 
