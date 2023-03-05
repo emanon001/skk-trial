@@ -236,8 +236,13 @@ updateKanaMode { isHiragana, inputModeValue, context, inputKey } =
                 }
 
         DictRegistrationMode conversionValue ->
-            -- TODO: 実装
-            AsciiMode { kakutei = Nothing }
+            updateDictRegistrationMode
+                { isHiragana = isHiragana
+                , kakutei = inputModeValue.kakutei
+                , conversionModeValue = conversionValue
+                , context = context
+                , inputKey = inputKey
+                }
 
 
 
@@ -527,6 +532,41 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
         case prevMode of
             PreDictConversionMidashiInputMode _ ->
                 buildKanaMode isHiragana (concatInputString kakutei converted) (KakuteiInputMode { mikakutei = Nothing })
+
+    else
+        -- ignore
+        default
+
+
+updateDictRegistrationMode : { isHiragana : Bool, kakutei : Maybe String, conversionModeValue : DictRegistrationModeValue, context : SkkContext, inputKey : SkkInputKey } -> SkkInputMode
+updateDictRegistrationMode { isHiragana, kakutei, conversionModeValue, inputKey } =
+    let
+        -- 直前の変換モード
+        previousConversionMode : SkkInputMode
+        previousConversionMode =
+            let
+                { prevMode } =
+                    conversionModeValue
+            in
+            buildKanaMode isHiragana
+                kakutei
+                (case prevMode of
+                    PreDictConversionMidashiInputMode v ->
+                        MidashiInputMode v
+                )
+
+        -- デフォルト値
+        default : SkkInputMode
+        default =
+            buildKanaMode isHiragana kakutei (DictRegistrationMode conversionModeValue)
+    in
+    if isCancelKey inputKey then
+        -- キャンセル
+        previousConversionMode
+
+    else if isEnterKey inputKey then
+        -- TODO: 確定
+        default
 
     else
         -- ignore
