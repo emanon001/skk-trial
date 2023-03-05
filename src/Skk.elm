@@ -30,17 +30,23 @@ type SkkInputMode
     | KatakanaMode KatakanaModeValue -- カタカナを入力するモード
 
 
+{-| Asciiモード
+-}
 type alias AsciiModeValue =
     { kakutei : Maybe String
     }
 
 
+{-| ひらがなモード
+-}
 type alias HiraganaModeValue =
     { kakutei : Maybe String
     , conversionMode : SkkConversionMode
     }
 
 
+{-| カタカナモード
+-}
 type alias KatakanaModeValue =
     { kakutei : Maybe String
     , conversionMode : SkkConversionMode
@@ -56,19 +62,26 @@ type SkkConversionMode
     | MidashiInputMode MidashiInputModeValue -- ▽モード(見出し語入力モード)。辞書変換の対象となる『ひらがな』『カタカナ』の見出し語を入力するモード
     | MidashiOkuriInputMode MidashiOkuriInputModeValue -- ▽モード(見出し語入力モード/送り仮名)。辞書変換の対象となる『ひらがな』『カタカナ』の送り仮名を入力するモード
     | DictConversionMode DictConversionModeValue -- ▼モード(辞書変換モード)。見出し語について辞書変換を行うモード
+    | DictRegistrationMode DictRegistrationModeValue -- 辞書登録モード。辞書登録を行うモード
 
 
+{-| 確定入力モードの値
+-}
 type alias KakuteiInputModeValue =
     { mikakutei : Maybe String
     }
 
 
+{-| 見出し語入力モードの値
+-}
 type alias MidashiInputModeValue =
     { kakuteiMidashi : Maybe String -- 確定した見出し語
     , mikakuteiMidashi : Maybe String -- 未確定の見出し語
     }
 
 
+{-| 送り仮名入力モードの値
+-}
 type alias MidashiOkuriInputModeValue =
     { midashi : MidashiInputModeValue -- 見出し語。"▽たたか*っt" の場合は "たたか"
     , headOkuri : Maybe String -- 送り仮名の最初のローマ字。"▽たたか*っt" の場合は "っ" を構成する "t"
@@ -77,16 +90,32 @@ type alias MidashiOkuriInputModeValue =
     }
 
 
+{-| 辞書変換前のモード
+-}
 type SkkPrevDictConversionMode
     = PreDictConversionMidashiInputMode MidashiInputModeValue
 
 
+{-| 辞書変換モードの値
+-}
 type alias DictConversionModeValue =
     { prevMode : SkkPrevDictConversionMode -- 辞書変換前のモード
     , candidateList : SkkDict.SkkDictCandidateList -- 変換候補の一覧
     , pos : Int -- 変換候補の位置
     , okuri : Maybe String -- 送り仮名。"走る" を変換している場合は "る"
     }
+
+
+{-| 辞書登録モードの値
+-}
+type alias DictRegistrationModeValue =
+    { prevMode : SkkPrevDictConversionMode -- 辞書変換前のモード
+    , inputMode : SkkInputMode -- 辞書登録に使用する入力モード
+    }
+
+
+
+---- 入力キー
 
 
 {-| KeyboardEventのwrapper
@@ -205,6 +234,10 @@ updateKanaMode { isHiragana, inputModeValue, context, inputKey } =
                 , context = context
                 , inputKey = inputKey
                 }
+
+        DictRegistrationMode conversionValue ->
+            -- TODO: 実装
+            AsciiMode { kakutei = Nothing }
 
 
 
