@@ -452,7 +452,7 @@ suite =
                                 { kakutei = Just "あいう"
                                 , conversionMode =
                                     Skk.DictRegistrationMode
-                                        { prevMode = Skk.PrevDictConversionMidashiInputMode conversionValue
+                                        { prevMode = Skk.PrevDictRegistrationMidashiInputMode conversionValue
                                         , inputMode =
                                             Skk.HiraganaMode
                                                 { kakutei = Nothing
@@ -598,7 +598,7 @@ suite =
                                 { kakutei = Just "あいう"
                                 , conversionMode =
                                     Skk.DictRegistrationMode
-                                        { prevMode = Skk.PrevDictConversionMidashiInputMode midashi
+                                        { prevMode = Skk.PrevDictRegistrationMidashiInputMode midashi
                                         , inputMode =
                                             Skk.HiraganaMode
                                                 { kakutei = Nothing
@@ -641,7 +641,7 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
-                , test "次の変換候補が存在しない場合、Spaceキーを入力すると、状態が変わらないこと" <|
+                , test "次の変換候補が存在しない場合、Spaceキーを入力すると、辞書登録モードに遷移すること" <|
                     \_ ->
                         let
                             preConversionValue =
@@ -666,7 +666,19 @@ suite =
                                 buildPlainInputKey "Space"
                         in
                         Expect.equal
-                            skk.mode
+                            (Skk.HiraganaMode
+                                { kakutei = Just "あいう"
+                                , conversionMode =
+                                    Skk.DictRegistrationMode
+                                        { prevMode = Skk.PrevDictRegistrationDictConversionMode conversionValue
+                                        , inputMode =
+                                            Skk.HiraganaMode
+                                                { kakutei = Nothing
+                                                , conversionMode = Skk.KakuteiInputMode { mikakutei = Nothing }
+                                                }
+                                        }
+                                }
+                            )
                             (Skk.update skk key).mode
                 , test "前の変換候補が存在する場合、xキーを入力すると、前の変換候補が選択されること" <|
                     \_ ->

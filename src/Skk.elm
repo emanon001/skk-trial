@@ -1,4 +1,4 @@
-module Skk exposing (Skk, SkkContext, SkkConversionMode(..), SkkInputKey, SkkInputMode(..), SkkPrevDictConversionMode(..), init, update)
+module Skk exposing (Skk, SkkContext, SkkConversionMode(..), SkkInputKey, SkkInputMode(..), SkkPrevDictConversionMode(..), SkkPrevDictRegistrationModeValue(..), init, update)
 
 import Array
 import Maybe.Extra exposing (isJust, isNothing)
@@ -106,10 +106,17 @@ type alias DictConversionModeValue =
     }
 
 
+{-| 辞書登録前のモード
+-}
+type SkkPrevDictRegistrationModeValue
+    = PrevDictRegistrationMidashiInputMode MidashiInputModeValue
+    | PrevDictRegistrationDictConversionMode DictConversionModeValue
+
+
 {-| 辞書登録モードの値
 -}
 type alias DictRegistrationModeValue =
-    { prevMode : SkkPrevDictConversionMode -- 辞書変換前のモード
+    { prevMode : SkkPrevDictRegistrationModeValue -- 辞書登録前のモード
     , inputMode : SkkInputMode -- 辞書登録に使用する入力モード
     }
 
@@ -376,7 +383,7 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
                 buildKanaMode isHiragana
                     kakutei
                     (DictRegistrationMode
-                        { prevMode = PrevDictConversionMidashiInputMode conversionModeValue
+                        { prevMode = PrevDictRegistrationMidashiInputMode conversionModeValue
                         , inputMode = initKanaMode isHiragana
                         }
                     )
@@ -446,7 +453,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
                     buildKanaMode isHiragana
                         kakutei
                         (DictRegistrationMode
-                            { prevMode = PrevDictConversionMidashiInputMode conversionModeValue.midashi
+                            { prevMode = PrevDictRegistrationMidashiInputMode conversionModeValue.midashi
                             , inputMode = initKanaMode isHiragana
                             }
                         )
@@ -512,8 +519,13 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
                 conversionModeValue
         in
         if pos + 1 == List.length candidateList then
-            -- TODO: 辞書登録モード
-            default
+            buildKanaMode isHiragana
+                kakutei
+                (DictRegistrationMode
+                    { prevMode = PrevDictRegistrationDictConversionMode conversionModeValue
+                    , inputMode = initKanaMode isHiragana
+                    }
+                )
 
         else
             buildKanaMode isHiragana kakutei (DictConversionMode { conversionModeValue | pos = pos + 1 })
@@ -563,8 +575,11 @@ updateDictRegistrationMode { isHiragana, kakutei, conversionModeValue, context, 
             buildKanaMode isHiragana
                 kakutei
                 (case prevMode of
-                    PrevDictConversionMidashiInputMode v ->
+                    PrevDictRegistrationMidashiInputMode v ->
                         MidashiInputMode v
+
+                    PrevDictRegistrationDictConversionMode v ->
+                        DictConversionMode v
                 )
 
         -- TODO: キャンセル可能か
