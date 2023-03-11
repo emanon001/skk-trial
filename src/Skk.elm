@@ -442,8 +442,14 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
                         (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0, okuri = newOkuriKakutei })
 
                 Nothing ->
-                    -- TODO: 変換候補がない場合に、辞書登録モードに移行
-                    default
+                    -- 変換候補がない場合は辞書登録モードに遷移する
+                    buildKanaMode isHiragana
+                        kakutei
+                        (DictRegistrationMode
+                            { prevMode = PrevDictConversionMidashiInputMode conversionModeValue.midashi
+                            , inputMode = initKanaMode isHiragana
+                            }
+                        )
 
         else
             -- 送り仮名が確定していない

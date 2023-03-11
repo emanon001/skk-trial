@@ -574,6 +574,40 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "送り仮名が確定する かつ 変換候補がない場合、辞書登録モードに遷移すること" <|
+                    \_ ->
+                        let
+                            midashi =
+                                { kakuteiMidashi = Just "こうほなし", mikakuteiMidashi = Nothing }
+
+                            conversionValue =
+                                { midashi = midashi
+                                , headOkuri = Just "r"
+                                , kakuteiOkuri = Nothing
+                                , mikakuteiOkuri = Just "r"
+                                }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = Just "あいう", conversionMode = Skk.MidashiOkuriInputMode conversionValue })
+
+                            key =
+                                { key = "u", shift = False, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = Just "あいう"
+                                , conversionMode =
+                                    Skk.DictRegistrationMode
+                                        { prevMode = Skk.PrevDictConversionMidashiInputMode midashi
+                                        , inputMode =
+                                            Skk.HiraganaMode
+                                                { kakutei = Nothing
+                                                , conversionMode = Skk.KakuteiInputMode { mikakutei = Nothing }
+                                                }
+                                        }
+                                }
+                            )
+                            (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード(変換モード: 辞書変換モード)"
                 [ test "次の変換候補が存在する場合、Spaceキーを入力すると、次の変換候補が選択されること" <|
