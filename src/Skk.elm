@@ -93,7 +93,7 @@ type alias MidashiOkuriInputModeValue =
 {-| 辞書変換前のモード
 -}
 type SkkPrevDictConversionMode
-    = PreDictConversionMidashiInputMode MidashiInputModeValue
+    = PrevDictConversionMidashiInputMode MidashiInputModeValue
 
 
 {-| 辞書変換モードの値
@@ -360,7 +360,7 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
         -- ▽ねこ + Space → ▼猫
         let
             prevMode =
-                PreDictConversionMidashiInputMode { conversionModeValue | mikakuteiMidashi = Nothing }
+                PrevDictConversionMidashiInputMode { conversionModeValue | mikakuteiMidashi = Nothing }
 
             canditateList =
                 SkkDict.getCandidateList (Maybe.withDefault "" conversionModeValue.kakuteiMidashi) [ context.dict ]
@@ -421,7 +421,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
             -- 送り仮名が確定した
             let
                 prevMode =
-                    PreDictConversionMidashiInputMode conversionModeValue.midashi
+                    PrevDictConversionMidashiInputMode conversionModeValue.midashi
 
                 searchKey =
                     Maybe.withDefault "" (concatInputString conversionModeValue.midashi.kakuteiMidashi newOkuriHead)
@@ -480,7 +480,7 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
             buildKanaMode isHiragana
                 kakutei
                 (case prevMode of
-                    PreDictConversionMidashiInputMode v ->
+                    PrevDictConversionMidashiInputMode v ->
                         MidashiInputMode v
                 )
 
@@ -530,7 +530,7 @@ updateDictConversionMode { isHiragana, kakutei, conversionModeValue, inputKey } 
                 Array.fromList candidateList |> Array.get pos
         in
         case prevMode of
-            PreDictConversionMidashiInputMode _ ->
+            PrevDictConversionMidashiInputMode _ ->
                 buildKanaMode isHiragana (concatInputString kakutei converted) (KakuteiInputMode { mikakutei = Nothing })
 
     else
@@ -551,7 +551,7 @@ updateDictRegistrationMode { isHiragana, kakutei, conversionModeValue, context, 
             buildKanaMode isHiragana
                 kakutei
                 (case prevMode of
-                    PreDictConversionMidashiInputMode v ->
+                    PrevDictConversionMidashiInputMode v ->
                         MidashiInputMode v
                 )
 
