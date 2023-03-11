@@ -372,8 +372,14 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
                     (DictConversionMode { prevMode = prevMode, candidateList = candidateList, pos = 0, okuri = Nothing })
 
             Nothing ->
-                -- TODO: 変換候補がない場合に、辞書登録モードに移行
-                default
+                -- 変換候補がない場合は辞書登録モードに遷移
+                buildKanaMode isHiragana
+                    kakutei
+                    (DictRegistrationMode
+                        { prevMode = PrevDictConversionMidashiInputMode conversionModeValue
+                        , inputMode = initKanaMode isHiragana
+                        }
+                    )
 
     else if isBackSpaceKey inputKey then
         -- 削除

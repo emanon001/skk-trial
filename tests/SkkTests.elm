@@ -435,6 +435,33 @@ suite =
                                 }
                             )
                             (Skk.update skk key).mode
+                , test "見出し語を入力している最中にSpaceキーを入力する かつ 変換候補がない場合、辞書登録モードに遷移すること" <|
+                    \_ ->
+                        let
+                            conversionValue =
+                                { kakuteiMidashi = Just "こうほなし", mikakuteiMidashi = Nothing }
+
+                            skk =
+                                initSkk (Skk.HiraganaMode { kakutei = Just "あいう", conversionMode = Skk.MidashiInputMode conversionValue })
+
+                            key =
+                                { key = "Space", shift = False, ctrl = False }
+                        in
+                        Expect.equal
+                            (Skk.HiraganaMode
+                                { kakutei = Just "あいう"
+                                , conversionMode =
+                                    Skk.DictRegistrationMode
+                                        { prevMode = Skk.PrevDictConversionMidashiInputMode conversionValue
+                                        , inputMode =
+                                            Skk.HiraganaMode
+                                                { kakutei = Nothing
+                                                , conversionMode = Skk.KakuteiInputMode { mikakutei = Nothing }
+                                                }
+                                        }
+                                }
+                            )
+                            (Skk.update skk key).mode
                 ]
             , describe "ひらがな入力モード(変換モード: 見出し語入力モード/送り仮名)"
                 [ test "確定済みの送り仮名が存在する かつ 未確定の送り仮名が存在しない場合、BSキーを入力すると確定済みの送り仮名が削除されること" <|
