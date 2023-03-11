@@ -169,7 +169,7 @@ updateAsciiMode { inputModeValue, inputKey } =
             Regex.fromString "^[a-zA-Z0-9 +=!@#$%^&*()\\-_`~\\|'\":;[\\]{}?/.,<>]$" |> Maybe.withDefault Regex.never
     in
     if isSwitchToHiraganaModeKey inputKey then
-        HiraganaMode { kakutei = inputModeValue.kakutei, conversionMode = initKakuteiInputMode }
+        buildKanaMode True inputModeValue.kakutei initKakuteiInputMode
 
     else if Regex.contains asciiRegex inputKey.key then
         AsciiMode { kakutei = concatInputString inputModeValue.kakutei (Just inputKey.key) }
@@ -672,6 +672,11 @@ initKakuteiInputMode =
 buildKakuteiInputMode : Maybe String -> SkkConversionMode
 buildKakuteiInputMode mikakutei =
     KakuteiInputMode { mikakutei = mikakutei }
+
+
+initKanaMode : Bool -> SkkInputMode
+initKanaMode isHiragana =
+    buildKanaMode isHiragana Nothing initKakuteiInputMode
 
 
 buildKanaMode : Bool -> Maybe String -> SkkConversionMode -> SkkInputMode
