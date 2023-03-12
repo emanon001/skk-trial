@@ -42,16 +42,20 @@ fromDictString dictStr =
                 _ :: [] ->
                     Nothing
 
-                key :: henkanList ->
+                key :: conversionList ->
                     Just
                         ( String.trim key
-                        , List.map (String.split ";" >> List.head) henkanList
-                            |> List.map (Maybe.withDefault "")
+                        , List.map removeAnnotation conversionList
+                            |> Maybe.Extra.values
                             |> List.filter (not << String.isEmpty)
                         )
 
                 _ ->
                     Nothing
+
+        removeAnnotation : String -> Maybe String
+        removeAnnotation s =
+            (String.split ";" >> List.head) s
 
         buildDict : List String -> SkkDict
         buildDict lines =
