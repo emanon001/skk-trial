@@ -1,4 +1,4 @@
-module SkkDict exposing (SkkDict, SkkDictCandidate, SkkDictCandidateList, SkkDictKey, fromDictString, getCandidateList)
+module SkkDict exposing (SkkDict, SkkDictCandidate, SkkDictCandidateList, SkkDictKey, fromDictString, getCombinedCandidateList)
 
 import Dict exposing (Dict)
 import List
@@ -78,16 +78,15 @@ fromDictString dictStr =
     toLines dictStr |> filterLines |> buildDict
 
 
-initUserDict : String -> SkkUserDict
+initUserDict : Maybe String -> SkkUserDict
 initUserDict dictStr =
     let
         dict =
-            fromDictString dictStr
+            fromDictString (Maybe.withDefault "" dictStr)
 
         get : SkkDictKey -> SkkDict -> Maybe SkkDictCandidateList
         get key d =
-            -- TODO: 実装
-            Nothing
+            getCandidateList key d
 
         insert : SkkDictKey -> String -> SkkDict -> SkkDict
         insert key v d =
@@ -110,8 +109,13 @@ initUserDict dictStr =
 ---- query
 
 
-getCandidateList : SkkDictKey -> List SkkDict -> Maybe SkkDictCandidateList
-getCandidateList key dictList =
+getCandidateList : SkkDictKey -> SkkDict -> Maybe SkkDictCandidateList
+getCandidateList key dict =
+    Dict.get key dict
+
+
+getCombinedCandidateList : SkkDictKey -> List SkkDict -> Maybe SkkDictCandidateList
+getCombinedCandidateList key dictList =
     case dictList of
         [] ->
             Nothing
@@ -122,9 +126,9 @@ getCandidateList key dictList =
         dict :: rest ->
             let
                 list1 =
-                    Dict.get key dict
+                    getCandidateList key dict
 
                 list2 =
-                    getCandidateList key rest
+                    getCombinedCandidateList key rest
             in
             Maybe.Extra.combine [ list1, list2 ] |> Maybe.map List.concat

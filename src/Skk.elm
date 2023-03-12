@@ -370,7 +370,7 @@ updateMidashiInputMode { isHiragana, kakutei, conversionModeValue, context, inpu
                 PrevDictConversionMidashiInputMode { conversionModeValue | mikakuteiMidashi = Nothing }
 
             canditateList =
-                SkkDict.getCandidateList (Maybe.withDefault "" conversionModeValue.kakuteiMidashi) [ context.dict ]
+                SkkDict.getCombinedCandidateList (Maybe.withDefault "" conversionModeValue.kakuteiMidashi) [ context.dict ]
         in
         case canditateList of
             Just candidateList ->
@@ -440,7 +440,7 @@ updateMidashiOkuriInputMode { isHiragana, kakutei, conversionModeValue, context,
                     Maybe.withDefault "" (concatInputString conversionModeValue.midashi.kakuteiMidashi newOkuriHead)
 
                 canditateList =
-                    SkkDict.getCandidateList searchKey [ context.dict ]
+                    SkkDict.getCombinedCandidateList searchKey [ context.dict ]
             in
             case canditateList of
                 Just candidateList ->

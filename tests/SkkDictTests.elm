@@ -72,7 +72,7 @@ suite =
                     in
                     Expect.equal
                         (Just [ "今日", "京", "強", "卿", "狂" ])
-                        (SkkDict.getCandidateList "きょう" [ dict, dict2 ])
+                        (SkkDict.getCombinedCandidateList "きょう" [ dict, dict2 ])
             , test "存在しないキーを指定するとNothingを返すこと" <|
                 \_ ->
                     let
@@ -96,6 +96,6 @@ suite =
                     in
                     Expect.equal
                         Nothing
-                        (SkkDict.getCandidateList "存在しないキー" [ dict, dict2 ])
+                        (SkkDict.getCombinedCandidateList "存在しないキー" [ dict, dict2 ])
             ]
         ]
