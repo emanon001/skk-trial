@@ -1,4 +1,4 @@
-module SkkDict exposing (SkkDict, SkkDictCandidateList, SkkDictKey, fromDictString, getCandidateList)
+module SkkDict exposing (SkkDict, SkkDictCandidate, SkkDictCandidateList, SkkDictKey, fromDictString, getCandidateList)
 
 import Dict exposing (Dict)
 import List
@@ -27,8 +27,12 @@ type alias SkkDictKey =
     String
 
 
+type alias SkkDictCandidate =
+    String
+
+
 type alias SkkDictCandidateList =
-    List String
+    List SkkDictCandidate
 
 
 
