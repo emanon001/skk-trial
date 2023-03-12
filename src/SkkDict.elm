@@ -6,11 +6,21 @@ import Maybe.Extra
 
 
 
--- types
+---- types
 
 
 type alias SkkDict =
     Dict SkkDictKey SkkDictCandidateList
+
+
+{-| ユーザー辞書
+-}
+type alias SkkUserDict =
+    { dict : SkkDict
+    , get : SkkDictKey -> SkkDict -> Maybe SkkDictCandidateList
+    , insert : SkkDictKey -> String -> SkkDict -> SkkDict
+    , remove : SkkDictKey -> String -> SkkDict -> SkkDict
+    }
 
 
 type alias SkkDictKey =
@@ -22,7 +32,7 @@ type alias SkkDictCandidateList =
 
 
 
--- create
+---- create
 
 
 fromDictString : String -> SkkDict
@@ -64,8 +74,36 @@ fromDictString dictStr =
     toLines dictStr |> filterLines |> buildDict
 
 
+initUserDict : String -> SkkUserDict
+initUserDict dictStr =
+    let
+        dict =
+            fromDictString dictStr
 
--- get
+        get : SkkDictKey -> SkkDict -> Maybe SkkDictCandidateList
+        get key d =
+            -- TODO: 実装
+            Nothing
+
+        insert : SkkDictKey -> String -> SkkDict -> SkkDict
+        insert key v d =
+            -- TODO: 実装
+            d
+
+        remove : SkkDictKey -> String -> SkkDict -> SkkDict
+        remove k v d =
+            -- TODO: 実装
+            d
+    in
+    { dict = dict
+    , get = get
+    , insert = insert
+    , remove = remove
+    }
+
+
+
+---- query
 
 
 getCandidateList : SkkDictKey -> List SkkDict -> Maybe SkkDictCandidateList
