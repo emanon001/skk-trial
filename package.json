@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "",
-  "dependencies": {
-    "elm": "^0.19.1-5",
-    "elm-test": "^0.19.1-revision9"
-  },
   "scripts": {
     "test": "elm-test"
   },
@@ -19,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/emanon001/skk-trial/issues"
   },
-  "homepage": "https://github.com/emanon001/skk-trial#readme"
+  "homepage": "https://github.com/emanon001/skk-trial#readme",
+  "devDependencies": {
+    "elm": "^0.19.1-5",
+    "elm-format": "^0.8.7",
+    "elm-test": "^0.19.1-revision9"
+  }
 }
