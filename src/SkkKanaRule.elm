@@ -1,21 +1,10 @@
-module SkkKanaRule exposing (KanaRuleSearchResult(..), SkkKanaRule, SkkKanaRuleTree(..), SkkKanaRules, getDefaultRules, search)
-
-import Dict exposing (Dict)
-import Dict.Extra exposing (filterGroupBy)
-
-
+module SkkKanaRule exposing (KanaRuleSearchResult(..), SkkKanaRule, SkkKanaRules, getDefaultRules, search)
 
 -- types
 
 
 type alias SkkKanaRules =
-    { tree : SkkKanaRuleTree
-    }
-
-
-type SkkKanaRuleTree
-    = SkkKanaRuleLeafNode SkkKanaRule
-    | SkkKanaRuleInternalNode (Dict Char SkkKanaRuleTree)
+    List SkkKanaRule
 
 
 type alias SkkKanaRule =
@@ -316,8 +305,8 @@ getDefaultRules =
         filterLines =
             List.filter (\l -> not (String.isEmpty l) && not (String.startsWith "#" l))
 
-        normalizeRuleStr : String -> String
-        normalizeRuleStr =
+        decodeSpecialChars : String -> String
+        decodeSpecialChars =
             String.replace "<SPACE>" " "
 
         toRule : String -> Maybe SkkKanaRule
@@ -325,49 +314,26 @@ getDefaultRules =
             case String.split " " l of
                 key :: hiragana :: katakana :: [] ->
                     Just
-                        { key = normalizeRuleStr key
-                        , hiragana = normalizeRuleStr hiragana
-                        , katakana = normalizeRuleStr katakana
+                        { key = decodeSpecialChars key
+                        , hiragana = decodeSpecialChars hiragana
+                        , katakana = decodeSpecialChars katakana
                         , next = Nothing
                         }
 
                 key :: hiragana :: katakana :: next :: [] ->
                     Just
-                        { key = normalizeRuleStr key
-                        , hiragana = normalizeRuleStr hiragana
-                        , katakana = normalizeRuleStr katakana
-                        , next = Just (normalizeRuleStr next)
+                        { key = decodeSpecialChars key
+                        , hiragana = decodeSpecialChars hiragana
+                        , katakana = decodeSpecialChars katakana
+                        , next = Just (decodeSpecialChars next)
                         }
 
                 _ ->
                     Nothing
 
-        toTree : Int -> List SkkKanaRule -> SkkKanaRuleTree
-        toTree pos rules =
-            let
-                leaf : Maybe SkkKanaRule
-                leaf =
-                    List.filter (\r -> edgeChar pos r.key == Nothing) rules |> List.head
-
-                nodeGroup : Dict Char (List SkkKanaRule)
-                nodeGroup =
-                    filterGroupBy (.key >> edgeChar pos) rules
-            in
-            case leaf of
-                Just l ->
-                    SkkKanaRuleLeafNode l
-
-                Nothing ->
-                    SkkKanaRuleInternalNode (nodeGroup |> Dict.map (\_ g -> toTree (pos + 1) g))
-
         buildRules : List String -> SkkKanaRules
         buildRules lines =
-            { tree = List.filterMap toRule lines |> toTree 0
-            }
-
-        edgeChar : Int -> String -> Maybe Char
-        edgeChar pos key =
-            String.toList key |> List.drop pos |> List.head
+            List.filterMap toRule lines
     in
     toLines kanaRuleString |> filterLines |> buildRules
 
@@ -385,26 +351,16 @@ type KanaRuleSearchResult
 search : String -> SkkKanaRules -> KanaRuleSearchResult
 search key rules =
     let
-        s : List Char -> SkkKanaRuleTree -> Maybe SkkKanaRuleTree
-        s chars tree =
-            case List.head chars of
-                Just ch ->
-                    case tree of
-                        SkkKanaRuleInternalNode children ->
-                            Dict.get ch children |> Maybe.andThen (s (List.drop 1 chars))
-
-                        _ ->
-                            Nothing
-
-                Nothing ->
-                    Just tree
+        matchedRules : List SkkKanaRule
+        matchedRules =
+            List.filter (\rule -> String.startsWith key rule.key) rules
     in
-    case s (String.toList key) rules.tree of
-        Just (SkkKanaRuleLeafNode rule) ->
+    case matchedRules of
+        [ rule ] ->
             PerfectMatch rule
 
-        Just (SkkKanaRuleInternalNode _) ->
+        _ :: _ ->
             PartialMatch
 
-        _ ->
+        [] ->
             NoMatch
