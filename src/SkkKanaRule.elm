@@ -301,17 +301,17 @@ getDefaultRules =
         toLines =
             String.lines
 
-        filterLines : List String -> List String
-        filterLines =
-            List.filter (\l -> not (String.isEmpty l) && not (String.startsWith "#" l))
+        isRuleLine : String -> Bool
+        isRuleLine line =
+            not (String.isEmpty line) && not (String.startsWith "#" line)
 
         decodeSpecialChars : String -> String
         decodeSpecialChars =
             String.replace "<SPACE>" " "
 
         toRule : String -> Maybe SkkKanaRule
-        toRule l =
-            case String.split " " l of
+        toRule line =
+            case String.split " " line of
                 key :: hiragana :: katakana :: [] ->
                     Just
                         { key = decodeSpecialChars key
@@ -330,12 +330,8 @@ getDefaultRules =
 
                 _ ->
                     Nothing
-
-        buildRules : List String -> SkkKanaRules
-        buildRules lines =
-            List.filterMap toRule lines
     in
-    toLines kanaRuleString |> filterLines |> buildRules
+    toLines kanaRuleString |> List.filter isRuleLine |> List.filterMap toRule
 
 
 
