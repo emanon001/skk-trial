@@ -348,10 +348,10 @@ search key rules =
             List.filter (\rule -> String.startsWith key rule.key) rules
     in
     case matchedRules of
-        [ rule ] ->
+        rule :: [] ->
             PerfectMatch rule
 
-        _ :: _ ->
+        _ :: _ :: _ ->
             PartialMatch
 
         [] ->
