@@ -4,9 +4,9 @@
   "description": "",
   "main": "",
   "dependencies": {
+    "elm": "^0.19.1-5",
     "elm-test": "^0.19.1-revision9"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "elm-test"
   },
