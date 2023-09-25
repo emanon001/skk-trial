@@ -297,10 +297,6 @@ z<SPACE> \u{3000} \u{3000}
 getDefaultRules : SkkKanaRules
 getDefaultRules =
     let
-        toLines : String -> List String
-        toLines =
-            String.lines
-
         isRuleLine : String -> Bool
         isRuleLine line =
             not (String.isEmpty line) && not (String.startsWith "#" line)
@@ -331,7 +327,7 @@ getDefaultRules =
                 _ ->
                     Nothing
     in
-    toLines kanaRuleString |> List.filter isRuleLine |> List.filterMap toRule
+    String.lines kanaRuleString |> List.filter isRuleLine |> List.filterMap toRule
 
 
 
