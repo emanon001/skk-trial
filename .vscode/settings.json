@@ -1,0 +1,5 @@
+{
+  "[elm]": {
+    "editor.defaultFormatter": "elmTooling.elm-ls-vscode"
+  }
+}
