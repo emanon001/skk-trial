@@ -1,10 +1,10 @@
-module SkkTests exposing (..)
+module SkkTests.SkkTests exposing (..)
 
 import Dict
 import Expect
 import Skk exposing (SkkConversionMode(..))
-import SkkDict
 import SkkKanaRule
+import SkkTests.TestHelper exposing (..)
 import Test exposing (..)
 
 
@@ -24,49 +24,7 @@ suite =
                         (Skk.init { kanaRules = SkkKanaRule.getDefaultRules, dict = Dict.empty })
             ]
         , describe "Skk.update"
-            [ describe "Ascii入力モード"
-                [ test "入力したキーが確定済みの文字列に追加されること" <|
-                    \_ ->
-                        let
-                            skk =
-                                initSkk (Skk.AsciiMode { kakutei = Nothing })
-
-                            key =
-                                buildPlainInputKey "a"
-                        in
-                        Expect.equal (Skk.AsciiMode { kakutei = Just "a" }) (Skk.update skk key).mode
-                , test "BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
-                    \_ ->
-                        let
-                            skk =
-                                initSkk (Skk.AsciiMode { kakutei = Just "abc" })
-
-                            key =
-                                buildPlainInputKey "BackSpace"
-                        in
-                        Expect.equal (Skk.AsciiMode { kakutei = Just "ab" }) (Skk.update skk key).mode
-                , test "確定済みの文字列が空の時にBSキーを入力すると、確定済み文字列が空のままになること" <|
-                    \_ ->
-                        let
-                            skk =
-                                initSkk (Skk.AsciiMode { kakutei = Nothing })
-
-                            key =
-                                buildPlainInputKey "BackSpace"
-                        in
-                        Expect.equal (Skk.AsciiMode { kakutei = Nothing }) (Skk.update skk key).mode
-                , test "Ctrl-jを入力すると、ひらがなモードに切り替わること" <|
-                    \_ ->
-                        let
-                            skk =
-                                initSkk (Skk.AsciiMode { kakutei = Just "abc" })
-
-                            key =
-                                { key = "j", shift = False, ctrl = True }
-                        in
-                        Expect.equal (Skk.HiraganaMode { kakutei = Just "abc", conversionMode = Skk.KakuteiInputMode { mikakutei = Nothing } }) (Skk.update skk key).mode
-                ]
-            , describe "ひらがな入力モード(変換モード: 確定入力モード)"
+            [ describe "ひらがな入力モード(変換モード: 確定入力モード)"
                 [ test "未確定の文字列が存在しない場合、BSキーを入力すると、確定済み文字列の末尾文字が削除されること" <|
                     \_ ->
                         let
@@ -919,42 +877,3 @@ suite =
                 ]
             ]
         ]
-
-
-
--- helper
-
-
-initSkk : Skk.SkkInputMode -> Skk.Skk
-initSkk mode =
-    let
-        dictString =
-            """
-            ねこ /猫/
-            だいすk /大好/
-            きょう /今日/京/強/
-            はしr /走/奔/
-            """
-    in
-    { mode = mode
-    , context =
-        { kanaRules = SkkKanaRule.getDefaultRules
-        , dict = SkkDict.fromDictString dictString
-        }
-    }
-
-
-buildPlainInputKey : String -> Skk.SkkInputKey
-buildPlainInputKey key =
-    { key = key
-    , shift = False
-    , ctrl = False
-    }
-
-
-buildMidashiInputKey : String -> Skk.SkkInputKey
-buildMidashiInputKey key =
-    { key = key
-    , shift = True
-    , ctrl = False
-    }
