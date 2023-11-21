@@ -1,5 +1,7 @@
 # skk-trial
 
+SKKをブラウザ上で試せるやつ(WIP)
+
 ## test
 
 ```
