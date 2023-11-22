@@ -8,7 +8,7 @@ import Test exposing (..)
 
 suite : Test
 suite =
-    describe "The Skk module (Ascii入力モード)"
+    describe "The Skk module / Ascii入力モード"
         [ describe "Skk.update"
             [ test "入力したキーが確定済みの文字列に追加されること" <|
                 \_ ->
